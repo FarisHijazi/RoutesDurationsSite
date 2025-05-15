@@ -1,0 +1,22 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Project Brief: Google Maps Routing Distance Matrix Calculator
+
+## Core Requirements and Goals
+
+This project aims to develop a web application that assists users in finding optimal property or living locations. The core functionality revolves around calculating and comparing travel times and distances to multiple user-defined destinations from a primary property location.
+
+### Key Goals:
+1.  **Location Input**: Allow users to mark a primary property location and multiple destination points on an interactive Google Map.
+2.  **Time-Based Calculations**: Enable users to select various time slots to calculate travel times, considering potential traffic fluctuations.
+3.  **Comprehensive Results**: Provide detailed calculations for travel times and distances for all combinations of property-to-destination and destination-to-property trips, for each specified time.
+4.  **Data Visualization**: Present results clearly through:
+    *   Color-coded traffic overlays on the map.
+    *   Graphs illustrating traffic patterns and experiences.
+    *   A detailed list summarizing all calculated travel metrics.
+
+## Project Scope
+The application will be a wizard-style user interface guiding users through location input, time selection, calculation, and results visualization. The primary technical dependency is the Google Maps API, particularly the Distance Matrix API.

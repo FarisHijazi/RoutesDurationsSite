@@ -1,0 +1,39 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Tech Context: Google Maps Routing Distance Matrix Calculator
+
+## Technologies Used
+*   **Frontend Framework**: React 18
+*   **Language**: TypeScript
+*   **Build Tool**: Vite
+*   **State Management**: Zustand
+*   **Styling**: TailwindCSS
+*   **Data Visualization**: Chart.js
+*   **Mapping & Routing**: Google Maps API (specifically Distance Matrix API)
+
+## Development Setup
+The development environment will require Node.js and npm/yarn for managing packages. The Vite development server will be used for running the application locally. A Google Maps API key with the Distance Matrix API enabled is essential for the core functionality.
+
+## Technical Constraints
+*   **API Quotas and Billing**: Usage of the Google Maps API is subject to quotas and billing. The application design should be mindful of API call efficiency.
+*   **Ad Blocker Compatibility**: Potential conflicts with ad blockers intercepting requests for certain UI assets (e.g., Lucide icons) need to be addressed.
+
+## Dependencies
+*   `react`, `react-dom` (@18.3.1)
+*   `@types/react` (@18.3.5), `@types/react-dom` (@18.3.0)
+*   `typescript` (@5.5.3)
+*   `vite` (@5.4.2)
+*   `zustand` (@4.4.7)
+*   `tailwindcss` (@3.4.1)
+*   `autoprefixer` (@10.4.18)
+*   `postcss` (@8.4.35)
+*   `chart.js` (@4.4.0), `react-chartjs-2` (@5.2.0)
+*   `@googlemaps/js-api-loader` (@1.16.2)
+*   `@googlemaps/react-wrapper` (@1.1.35) 
+*   `@types/google.maps` (@3.54.7)
+*   `lucide-react` (@0.344.0)
+*   `eslint` (@9.9.1), `eslint-plugin-react-hooks` (@5.1.0-rc.0), `eslint-plugin-react-refresh` (@0.4.11), `@eslint/js` (@9.9.1), `typescript-eslint` (@8.3.0), `globals` (@15.9.0)
+*   `@vitejs/plugin-react` (@4.3.1)

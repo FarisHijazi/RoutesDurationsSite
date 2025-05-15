@@ -1,0 +1,26 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Product Context: Google Maps Routing Distance Matrix Calculator
+
+## Why This Project Exists
+This project exists to simplify the complex decision-making process involved in choosing a property or living location. Commute times and accessibility to key destinations are major factors, and this tool aims to provide quantitative data to support these decisions.
+
+## Problems It Solves
+1.  **Difficult Commute Analysis**: Manually checking travel times for multiple destinations at different times of day is tedious and prone to error.
+2.  **Impact of Traffic**: Understanding how traffic variability affects travel to and from key locations.
+3.  **Informed Decision Making**: Provides users with concrete data to compare potential properties based on accessibility and travel convenience.
+
+## How It Should Work
+The application should guide users through a step-by-step wizard:
+1.  **Step 1: Define Locations**: Users interact with a map to set their primary (e.g., potential home) location and multiple important destinations (e.g., work, school, gym).
+2.  **Step 2: Select Times**: Users choose specific times of day for which travel calculations are needed (e.g., morning rush hour, midday, evening).
+3.  **Step 3: Calculate & Review**: The system uses the Google Maps Distance Matrix API to fetch travel times and distances for all selected locations and times. Results are then presented in an understandable format.
+
+## User Experience Goals
+*   **Intuitive Interface**: A clean, user-friendly wizard that is easy to navigate.
+*   **Clear Visualization**: Maps, graphs, and lists should present complex data in an easily digestible manner.
+*   **Actionable Insights**: Users should be able to quickly understand the travel implications for their chosen locations and times.
+*   **Responsive Design**: The application should be usable across different devices, with a focus on desktop for detailed analysis.

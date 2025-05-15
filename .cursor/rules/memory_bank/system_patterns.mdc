@@ -1,0 +1,50 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# System Patterns: Google Maps Routing Distance Matrix Calculator
+
+## System Architecture
+The application follows a component-based architecture, typical of React applications. It is a single-page application (SPA) where UI updates are handled dynamically on the client-side.
+
+### Key Architectural Components:
+*   **Wizard Flow Management**: `src/components/WizardContainer.tsx` orchestrates the step-by-step user journey. Includes `src/components/WizardNavigation.tsx` for step transitions.
+*   **Step Components (located in `src/components/steps/`)**:
+    *   `SetupStep.tsx`: Initial setup or welcome step (newly identified).
+    *   `LocationStep.tsx`: Handles user input for property and destination locations.
+    *   `TimeSelectionStep.tsx`: Allows users to select multiple time slots.
+    *   `ResultsStep.tsx`: Displays the calculated results.
+*   **Map Interaction (located in `src/components/map/`)**:
+    *   `MapComponent.tsx`: Provides the primary map interface for location selection.
+    *   `ResultsMap.tsx`: Visualizes routes and traffic information on the results page.
+    *   `mapStyles.css`: Styles specific to map components.
+*   **Results Presentation (located in `src/components/results/`)**:
+    *   `ResultsSummary.tsx`: Offers a high-level overview of findings.
+    *   `ResultsDetails.tsx`: Presents a detailed breakdown of times and distances.
+    *   `ResultsCharts.tsx`: Uses Chart.js to display travel data graphically.
+*   **State Management**: Centralized state is managed by Zustand, with the main store defined in `src/store/index.ts`.
+*   **API Service Layer**: `src/services/mapService.ts` encapsulates all interactions with the Google Maps API, abstracting the API calls from the UI components.
+*   **Core Application Entry**: `src/App.tsx` likely sets up the main application structure, and `src/main.tsx` initializes the React application.
+
+## Key Technical Decisions
+*   **React with TypeScript**: Chosen for robust, type-safe frontend development and a rich ecosystem.
+*   **Vite**: Selected for its fast build times and modern development experience.
+*   **Zustand**: A lightweight, minimalistic state management solution suitable for this project's scale.
+*   **TailwindCSS**: For utility-first CSS styling, enabling rapid UI development.
+*   **Chart.js**: For flexible and customizable data visualization.
+*   **Google Maps API**: The core enabler for routing and distance matrix calculations.
+
+## Design Patterns
+*   **Component-Based Architecture**: UI is broken down into reusable components.
+*   **Container/Presentational Pattern**: Likely used, where container components (`WizardContainer.tsx`, step components) manage logic and state, while presentational components focus on UI rendering.
+*   **Service Layer**: The `mapService.ts` acts as a service layer, decoupling API logic from the rest of the application.
+*   **Wizard Pattern**: The UI flow follows a sequential, multi-step process.
+
+## Component Relationships
+*   `WizardContainer.tsx` renders the active step component (e.g., `SetupStep`, `LocationStep`, `TimeSelectionStep`, `ResultsStep`) and uses `WizardNavigation.tsx`.
+*   `LocationStep.tsx` and `ResultsStep.tsx` utilize `MapComponent.tsx` and `ResultsMap.tsx` respectively (from `src/components/map/`).
+*   `ResultsStep.tsx` aggregates and displays data using `ResultsSummary.tsx`, `ResultsDetails.tsx`, and `ResultsCharts.tsx` (from `src/components/results/`).
+*   All components that need access to or need to modify shared application data interact with the Zustand store defined in `src/store/index.ts`.
+*   Components triggering map operations or data fetching call functions within `src/services/mapService.ts`.
+*   `App.tsx` is the root component rendered by `main.tsx`.

@@ -1,0 +1,28 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Active Context: Google Maps Routing Distance Matrix Calculator
+
+## Current Work Focus
+The memory bank has been updated to reflect the current project structure based on `package.json` and the contents of the `src/` directory. The project has moved beyond pure initialization to a state where a basic file and component skeleton exists.
+
+## Recent Changes
+*   Updated `tech_context.mdc` with dependencies from `package.json`.
+*   Updated `system_patterns.mdc` with the actual component structure found in `src/`.
+*   Updated `progress.mdc` to reflect that component files exist and the next step is to implement their internal logic and flesh out services/state.
+*   Identified new components like `SetupStep.tsx` and `WizardNavigation.tsx`.
+
+## Next Steps
+1.  Begin implementing the core logic within the existing component files, starting with the wizard flow and setup steps:
+    *   `src/components/WizardContainer.tsx`
+    *   `src/components/WizardNavigation.tsx`
+    *   `src/components/steps/SetupStep.tsx`
+2.  Develop the state management structure in `src/store/index.ts` to support the wizard and data flow.
+3.  Continue implementing the `LocationStep`, `TimeSelectionStep`, and `ResultsStep` components and their interactions with `mapService.ts` and the store.
+4.  Address items from the "Planned Features & Enhancements (TODOs)" or "Known Issues" sections of `progress.mdc` as the core functionality matures.
+
+## Active Decisions and Considerations
+*   The project has an existing file structure; new code should build upon this structure.
+*   Prioritize implementing the core wizard flow and data handling before tackling all planned enhancements.
