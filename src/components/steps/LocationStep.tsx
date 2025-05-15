@@ -172,7 +172,7 @@ const LocationStep: React.FC = () => {
             )}
           </div>
 
-          <div className="bg-gray-100 rounded-lg overflow-hidden h-[400px] sm:h-[500px]">
+          <div className="bg-gray-100 rounded-lg overflow-hidden h-[400px]">
             <Wrapper apiKey={apiKey} libraries={['places']}>
               <MapComponent 
                 locations={locations}

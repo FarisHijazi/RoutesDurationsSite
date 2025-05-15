@@ -1,0 +1,45 @@
+/* Map container styles */
+.gm-style {
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Improve controls for mobile */
+.gm-style .gm-style-mtc button,
+.gm-style .gm-svpc,
+.gm-style .gm-control-active {
+  height: 40px !important;
+  width: 40px !important;
+  padding: 8px !important;
+}
+
+/* Make map fullscreen button more visible */
+.gm-fullscreen-control {
+  padding: 8px !important;
+}
+
+/* Improve info window readability */
+.gm-style .gm-style-iw-c {
+  padding: 12px !important;
+  border-radius: 8px !important;
+  box-shadow: 0 2px 7px 1px rgba(0,0,0,0.1) !important;
+}
+
+.gm-style .gm-style-iw-d {
+  overflow: hidden !important;
+  padding: 0 !important;
+}
+
+/* Prevent text selection on map */
+.gm-style {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Hide Google Maps attributions on small screens */
+@media (max-width: 640px) {
+  .gm-style .gmnoprint.gm-style-cc {
+    display: none;
+  }
+}
