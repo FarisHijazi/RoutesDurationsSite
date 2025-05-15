@@ -12,8 +12,11 @@ const LocationStep: React.FC = () => {
   const [selectedPosition, setSelectedPosition] = useState<google.maps.LatLngLiteral | null>(null);
   const [searchResults, setSearchResults] = useState<google.maps.places.PlaceResult[]>([]);
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const searchTimeoutRef = useRef<number>();
   
+  const geocoderRef = useRef<google.maps.Geocoder | null>(null);
+  const placesServiceRef = useRef<google.maps.places.PlacesService | null>(null);
+  const [areLibrariesLoaded, setAreLibrariesLoaded] = useState(false);
+
   const hasProperty = locations.some(loc => loc.isProperty);
   
   useEffect(() => {
@@ -22,41 +25,54 @@ const LocationStep: React.FC = () => {
     }
   }, [hasProperty]);
 
+  // Initialize services once libraries are loaded
+  useEffect(() => {
+    if (areLibrariesLoaded) {
+      if (window.google && window.google.maps && window.google.maps.Geocoder) {
+        geocoderRef.current = new google.maps.Geocoder();
+      }
+      if (window.google && window.google.maps && window.google.maps.places && window.google.maps.places.PlacesService) {
+        // PlacesService constructor needs an HTMLDivElement attributions container, 
+        // it can be a detached element if not displaying attributions directly.
+        placesServiceRef.current = new google.maps.places.PlacesService(document.createElement('div'));
+      }
+    }
+  }, [areLibrariesLoaded]);
+
   const performSearch = useCallback((query: string) => {
-    if (!query.trim()) {
+    if (!areLibrariesLoaded || !placesServiceRef.current || !query.trim()) {
       setSearchResults([]);
       return;
     }
 
-    const service = new google.maps.places.PlacesService(document.createElement('div'));
-    service.textSearch({
+    placesServiceRef.current.textSearch({
       query: query,
     }, (results, status) => {
       if (status === google.maps.places.PlacesServiceStatus.OK && results) {
         setSearchResults(results);
+      } else {
+        setSearchResults([]); // Clear results on error or no results
       }
     });
-  }, []);
+  }, [areLibrariesLoaded]);
 
-  // Debounced search effect
+  // Perform search directly when searchQuery changes
   useEffect(() => {
-    // Clear previous timeout
-    if (searchTimeoutRef.current) {
-      window.clearTimeout(searchTimeoutRef.current);
-    }
-
-    // Set new timeout
-    searchTimeoutRef.current = window.setTimeout(() => {
-      performSearch(searchQuery);
-    }, 500); // 500ms delay
-
-    // Cleanup
-    return () => {
-      if (searchTimeoutRef.current) {
-        window.clearTimeout(searchTimeoutRef.current);
-      }
-    };
+    performSearch(searchQuery);
   }, [searchQuery, performSearch]);
+
+  // Reverse geocode when selectedPosition changes
+  useEffect(() => {
+    if (areLibrariesLoaded && selectedPosition && geocoderRef.current) {
+      geocoderRef.current.geocode({ location: selectedPosition }, (results, status) => {
+        if (status === 'OK' && results && results[0]) {
+          setLocationName(results[0].formatted_address);
+        } else {
+          console.warn('Geocode was not successful for the following reason: ' + status);
+        }
+      });
+    }
+  }, [selectedPosition, areLibrariesLoaded]);
 
   const handleSelectPlace = (place: google.maps.places.PlaceResult) => {
     if (place.geometry?.location) {
@@ -173,56 +189,82 @@ const LocationStep: React.FC = () => {
           </div>
 
           <div className="bg-gray-100 rounded-lg overflow-hidden h-[400px]">
-            <Wrapper apiKey={apiKey} libraries={['places']}>
-              <MapComponent 
-                locations={locations}
-                onPositionSelect={setSelectedPosition}
-                selectedPosition={selectedPosition}
-              />
-            </Wrapper>
+            {apiKey ? (
+              <Wrapper apiKey={apiKey} libraries={['places', 'geocoding']}>
+                <MapComponent 
+                  locations={locations}
+                  onPositionSelect={setSelectedPosition}
+                  selectedPosition={selectedPosition}
+                  onLibrariesLoaded={() => setAreLibrariesLoaded(true)}
+                />
+              </Wrapper>
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                <p className="text-gray-600 p-4 text-center">
+                  Google Maps API Key is missing. Please configure it in <code>src/store/index.ts</code> to enable map features.
+                </p>
+              </div>
+            )}
           </div>
           
-          {selectedPosition && (
-            <div className="mt-4 bg-blue-50 border border-blue-100 rounded-md p-4">
-              <h3 className="text-sm font-medium text-blue-800 mb-2">
-                Add this location:
-              </h3>
-              <div className="flex flex-col sm:flex-row gap-3">
-                <div className="flex-grow">
-                  <input
-                    type="text"
-                    value={locationName}
-                    onChange={(e) => setLocationName(e.target.value)}
-                    placeholder={isProperty ? "My Property" : "Destination name"}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  />
+          <div className="mt-4 bg-gray-50 border border-gray-200 rounded-md p-4">
+            <h3 className="text-sm font-medium text-gray-700 mb-3">
+              {selectedPosition ? 'Confirm Location Details:' : 'Select a Location to Add:'}
+            </h3>
+            <div className="flex flex-col gap-3">
+              <div className="flex-grow">
+                <label htmlFor="locationNameInput" className="sr-only">Location Name</label>
+                <input
+                  id="locationNameInput"
+                  type="text"
+                  value={locationName}
+                  onChange={(e) => setLocationName(e.target.value)}
+                  placeholder={isProperty && !hasProperty ? "Enter property name (e.g., Home)" : "Enter destination name"}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  disabled={!selectedPosition}
+                />
+              </div>
+              
+              {!hasProperty && (
+                <div className="flex items-center">
+                  <label className="inline-flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={isProperty}
+                      onChange={(e) => setIsProperty(e.target.checked)}
+                      className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                      disabled={!selectedPosition}
+                    />
+                    <span className="ml-2 text-sm text-gray-700">Set as Property Location</span>
+                  </label>
                 </div>
-                
-                {!hasProperty && (
-                  <div className="flex items-center">
-                    <label className="inline-flex items-center">
-                      <input
-                        type="checkbox"
-                        checked={isProperty}
-                        onChange={(e) => setIsProperty(e.target.checked)}
-                        className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-                      />
-                      <span className="ml-2 text-sm text-gray-700">This is my property</span>
-                    </label>
-                  </div>
-                )}
-                
-                <div>
-                  <button
-                    onClick={handleAddLocation}
-                    className="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-150"
-                  >
-                    Add Location
-                  </button>
-                </div>
+              )}
+              
+              <div>
+                <button
+                  onClick={handleAddLocation}
+                  disabled={!selectedPosition || !locationName.trim()}
+                  className={`w-full sm:w-auto px-4 py-2 rounded-md text-white transition duration-150 ${
+                    (!selectedPosition || !locationName.trim())
+                      ? 'bg-blue-300 cursor-not-allowed'
+                      : 'bg-blue-600 hover:bg-blue-700'
+                  }`}
+                >
+                  {selectedPosition ? 'Add This Location' : 'Click Map or Search to Select'}
+                </button>
               </div>
             </div>
-          )}
+            {selectedPosition && locationName && (
+                <p className="text-xs text-gray-500 mt-2">
+                    Selected: {locationName} (Lat: {selectedPosition.lat.toFixed(4)}, Lng: {selectedPosition.lng.toFixed(4)})
+                </p>
+            )}
+            {!selectedPosition && (
+                 <p className="text-xs text-gray-500 mt-2">
+                    Tip: Click on the map or use the search bar to pick a location.
+                </p>
+            )}
+          </div>
         </div>
         
         <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">

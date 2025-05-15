@@ -8,49 +8,47 @@ alwaysApply: true
 ## What Works
 *   The technical stack has been decided and dependencies are listed in `package.json`.
 *   A high-level architecture and key components have been outlined in `system_patterns.mdc`.
-*   Basic project structure within `src/` exists, including entry points (`main.tsx`, `App.tsx`) and some core component files.
-*   Key service `src/services/mapService.ts` and state management `src/store/index.ts` files are present.
-*   Component files for the wizard, steps, map, and results display are present (e.g., `WizardContainer.tsx`, `LocationStep.tsx`, `MapComponent.tsx`, `ResultsDetails.tsx`).
+*   Core project structure within `src/` exists, including entry points (`main.tsx`, `App.tsx`) and core component files.
+*   Key service `src/services/mapService.ts` and state management `src/store/index.ts` files are present and functional.
+*   **Wizard Flow and Navigation**: `WizardContainer.tsx` and `WizardNavigation.tsx` are implemented, including `SetupStep.tsx`.
+*   **Step Component Implementation**:
+    *   `SetupStep.tsx`: Handles API key input.
+    *   `LocationStep.tsx`: Features map interaction, location searching (instant search, reverse geocoding), and a persistent panel for adding locations. Mobile usability enhanced with a center map marker.
+    *   `TimeSelectionStep.tsx`: Allows selection of multiple time slots.
+    *   `ResultsStep.tsx`: Displays results (map, summary, details, charts) in a continuous layout. `ResultsMap.tsx` loads necessary Google Maps libraries.
+*   **Google Maps API Integration**: `mapService.ts` correctly fetches Distance Matrix data. Error handling for API calls in `ResultsStep.tsx` is improved.
+*   **State Management**: `store/index.ts` effectively manages application state (API key, wizard step, locations, times, results).
+*   **Results Display Enhancements**:
+    *   `ResultsSummary.tsx` now sorts destinations by average travel time.
+    *   `ResultsStep.tsx` uses a continuous, back-to-back display for results components.
 
 ## What's Left to Build
 
-### Core Functionality Implementation (Focus on implementing logic within existing files):
-*   **Refine and Implement UI/UX in `WizardContainer.tsx` and `WizardNavigation.tsx`**.
-*   **Implement Logic and UI for Step Components (in `src/components/steps/`)**:
-    *   `SetupStep.tsx`: Define and implement its role in the wizard.
-    *   `LocationStep.tsx`: Fully implement map interaction for adding primary and destination locations using `MapComponent.tsx`.
-    *   `TimeSelectionStep.tsx`: Implement UI for selecting time slots.
-    *   `ResultsStep.tsx`: Implement display of results using `ResultsMap.tsx`, `ResultsSummary.tsx`, `ResultsDetails.tsx`, and `ResultsCharts.tsx`.
-*   **Complete Google Maps API Integration in `src/services/mapService.ts`**:
-    *   Ensure functions for displaying maps, marking locations, and fetching Distance Matrix data are fully implemented and robust.
-*   **Develop State Management Logic in `src/store/index.ts`**:
-    *   Define state slices and actions for locations, times, results, and wizard progress.
+### New Feature (Next Major Focus):
+*   **User memory**
+    * add a way so that user's locations are already saved and there for returning users
+*   **Remove the "Add location at map center" button
 
-### Planned Features & Enhancements:
+*   **Find Closest Gym**:
+    *   Design and implement UI for users to trigger a search for gyms near their primary property location.
+    *   Integrate Google Maps Places API for "gym" searches.
+    *   Display gym search results (map and list).
+    *   Consider allowing users to add found gyms as destinations for route calculations.
+
+### Potential Minor Enhancements & Polish:
 *   **Mobile Map Usability**:
-    *   Ensure the map interface is mobile-friendly.
-    *   Display a marker in the center of the map for adding locations on mobile.
-    *   Avoid hardcoded values for map interactions.
-    *   Implement appropriate double-click functionality if relevant.
-*   **Improved Location Adding Workflow**:
-    *   Keep "add location" buttons persistently visible during the location selection step.
-    *   Update button text to be more instructive (e.g., "Move the map to add another location").
-    *   Ensure these buttons are not present on the results page.
-    *   Use the reverse geocoding Google Maps API to automatically give each destination a name in case the user has left the place name blank
-    *   In the Maps search bar, make it so that the user doesn't have to press ENTER for the search suggestions dropdown to appear, rather, start making API requests instantly as the user is typing every single character (yes I know this is expenstive but it's a better user experience).
-*   **Results Page Enhancements**:
-    *   Order results by: Best, Average, Worst.
-    *   Change the results page layout from tabs to a continuous, back-to-back display.
-*   **New Feature**:
-    *   Add an option for users to find the "closest" gym to their specified property location.
+    *   Further review map interactions on various mobile devices.
+    *   Consider if explicit "double-click" functionality is truly needed (currently deemed low priority).
+*   **Configuration**:
+    *   Make `MOCK_MODE` in `mapService.ts` configurable or ensure it's disabled for production builds.
+    *   Review other potentially hardcoded values (e.g., map zoom, `maxDuration` in `ResultsMap.tsx`) for configurability if beneficial.
 
 ## Current Status
-*   **Phase**: Initial Development / Skeleton Implementation.
-*   The memory bank has been updated with information from `package.json` and the `src/` directory structure.
-*   Core project files and component shells are in place.
-*   Focus is now on implementing the internal logic of these components and services.
+*   **Phase**: Core Functionality Complete / New Feature Development.
+*   Core wizard flow, location selection, time selection, route calculation, and results display are implemented as per initial requirements and most enhancements.
+*   Focus is shifting to the "Find Closest Gym" feature.
 
 ## Known Issues
-*   **Ad Blocker Conflict**: Some ad blockers (e.g., uBlock Origin) may block certain Lucide icon files (like `fingerprint.js`), potentially leading to a blank page or missing UI elements.
-    *   **Action**: Investigate replacing problematic icon names or implementing fallbacks.
-    *   **Temporary Workaround**: Disable ad blocker for the application's local address or add an exception.
+*   **Ad Blocker Conflict**: Some ad blockers (e.g., uBlock Origin) may block certain Lucide icon files (like `fingerprint.js`).
+    *   **Action**: Monitor; if it becomes a recurring problem for users, investigate self-hosting icons or alternative icon libraries.
+    *   **Temporary Workaround**: Disable ad blocker or add an exception.

@@ -1,21 +1,38 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Location } from '../../store';
+import { MapPinIcon } from 'lucide-react';
 
 interface MapComponentProps {
   locations: Location[];
   onPositionSelect: (position: google.maps.LatLngLiteral) => void;
   selectedPosition: google.maps.LatLngLiteral | null;
+  onLibrariesLoaded?: () => void;
 }
 
 const MapComponent: React.FC<MapComponentProps> = ({ 
   locations, 
   onPositionSelect,
-  selectedPosition 
+  selectedPosition, 
+  onLibrariesLoaded
 }) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [markers, setMarkers] = useState<google.maps.Marker[]>([]);
   const [tempMarker, setTempMarker] = useState<google.maps.Marker | null>(null);
+  const [isMobileView, setIsMobileView] = useState(window.innerWidth < 768);
+  const [centerMarkerVisible, setCenterMarkerVisible] = useState(false);
+
+  const handleResize = useCallback(() => {
+    const mobile = window.innerWidth < 768;
+    setIsMobileView(mobile);
+    setCenterMarkerVisible(mobile);
+  }, []);
+
+  useEffect(() => {
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [handleResize]);
   
   // Initialize map
   useEffect(() => {
@@ -47,7 +64,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
         );
       }
       
-      // Add click listener
+      // Add click listener (only if not in mobile view with center marker)
       mapInstance.addListener('click', (event: google.maps.MapMouseEvent) => {
         if (event.latLng) {
           const position = {
@@ -55,12 +72,16 @@ const MapComponent: React.FC<MapComponentProps> = ({
             lng: event.latLng.lng(),
           };
           onPositionSelect(position);
+          if (isMobileView) setCenterMarkerVisible(false);
         }
       });
       
       setMap(mapInstance);
+      if (onLibrariesLoaded) {
+        onLibrariesLoaded();
+      }
     }
-  }, [mapRef, map, onPositionSelect]);
+  }, [mapRef, map, onPositionSelect, isMobileView, onLibrariesLoaded]);
   
   // Update markers when locations change
   useEffect(() => {
@@ -112,16 +133,13 @@ const MapComponent: React.FC<MapComponentProps> = ({
     }
   }, [map, locations]);
   
-  // Handle temporary marker for selection
+  // Handle temporary marker for selection (non-mobile or when center marker is hidden)
   useEffect(() => {
-    if (map && selectedPosition) {
-      // Remove old temporary marker if exists
-      if (tempMarker) {
-        tempMarker.setMap(null);
-      }
-      
-      // Create new temporary marker
-      const newTempMarker = new google.maps.Marker({
+    let markerToSet: google.maps.Marker | null = null;
+
+    if (map && selectedPosition && !centerMarkerVisible) {
+      // Create a new marker instance if conditions are met
+      markerToSet = new google.maps.Marker({
         position: selectedPosition,
         map,
         icon: {
@@ -129,21 +147,53 @@ const MapComponent: React.FC<MapComponentProps> = ({
         },
         animation: google.maps.Animation.BOUNCE,
       });
-      
-      setTempMarker(newTempMarker);
-      
-      return () => {
-        if (newTempMarker) {
-          newTempMarker.setMap(null);
-        }
-      };
-    } else if (tempMarker) {
-      tempMarker.setMap(null);
-      setTempMarker(null);
     }
-  }, [map, selectedPosition, tempMarker]);
+
+    // Update the state with the new marker (or null if conditions were not met)
+    // This will replace any existing marker in the state.
+    setTempMarker(markerToSet);
+
+    // Cleanup function: this will be called when the component unmounts
+    // or when any of the dependencies change before the effect runs again.
+    // It should remove the marker that was created and set in *this specific run* of the effect.
+    return () => {
+      if (markerToSet) {
+        markerToSet.setMap(null);
+      }
+    };
+  }, [map, selectedPosition?.lat, selectedPosition?.lng, centerMarkerVisible]); // Use lat/lng for dependency to avoid loop
   
-  return <div ref={mapRef} className="w-full h-full" />;
+  // Callback for mobile "Add Location at Center" button
+  const handleAddCenterLocation = useCallback(() => {
+    if (map) {
+      const center = map.getCenter();
+      if (center) {
+        onPositionSelect({ lat: center.lat(), lng: center.lng() });
+        setCenterMarkerVisible(false);
+      }
+    }
+  }, [map, onPositionSelect]);
+
+  return (
+    <div className="relative w-full h-full">
+      <div ref={mapRef} className="w-full h-full" />
+      {isMobileView && centerMarkerVisible && (
+        <div 
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-10"
+        >
+          <MapPinIcon className="h-10 w-10 text-blue-600" style={{ transform: 'translateY(-50%)' }} />
+        </div>
+      )}
+      {isMobileView && (
+         <button 
+            onClick={handleAddCenterLocation} 
+            className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 bg-blue-600 text-white px-4 py-2 rounded-md shadow-lg text-sm"
+          >
+            Add Location at Map Center
+          </button>
+      )}
+    </div>
+  );
 };
 
 export default MapComponent;

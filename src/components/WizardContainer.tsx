@@ -1,5 +1,6 @@
 import React from 'react';
 import { useStore } from '../store';
+// import SetupStep from './steps/SetupStep'; // Removed
 import LocationStep from './steps/LocationStep';
 import TimeSelectionStep from './steps/TimeSelectionStep';
 import ResultsStep from './steps/ResultsStep';
@@ -10,13 +11,13 @@ const WizardContainer: React.FC = () => {
 
   const renderStep = () => {
     switch (step) {
-      case 0:
+      case 0: // Was SetupStep, now LocationStep
         return <LocationStep />;
-      case 1:
+      case 1: // Was LocationStep, now TimeSelectionStep
         return <TimeSelectionStep />;
-      case 2:
+      case 2: // Was TimeSelectionStep, now ResultsStep
         return <ResultsStep />;
-      default:
+      default: // Default to the first step (LocationStep)
         return <LocationStep />;
     }
   };

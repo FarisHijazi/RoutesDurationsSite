@@ -3,16 +3,16 @@ import { ArrowLeftIcon, ArrowRightIcon, RotateCcwIcon } from 'lucide-react';
 import { useStore } from '../store';
 
 const WizardNavigation: React.FC = () => {
-  const { step, setStep, locations, timeOptions, isCalculating, reset } = useStore();
+  const { step, setStep, locations, timeOptions, isCalculating, reset, apiKey } = useStore();
   
   const canGoNext = () => {
+    if (step === 0 && !apiKey) return false;
+
     switch (step) {
-      case 0: // Location selection
-        // Need at least a property location and one destination
+      case 0: // Location selection (was SetupStep, then LocationStep)
         return locations.filter(l => l.isProperty).length > 0 && 
                locations.filter(l => !l.isProperty).length > 0;
-      case 1: // Time selection
-        // At least one time option must be selected
+      case 1: // Time selection (was LocationStep, then TimeSelectionStep)
         return timeOptions.some(t => t.selected);
       default:
         return false;
@@ -38,11 +38,18 @@ const WizardNavigation: React.FC = () => {
   };
 
   // Progress indicator
-  const totalSteps = 3; // 0-indexed, so 3 steps = 0,1,2
+  const totalSteps = 3; // Updated from 4 to 3 (0,1,2)
   const progress = ((step + 1) / totalSteps) * 100;
 
   return (
     <div className="border-t border-gray-200">
+      {/* API Key Warning */}
+      {step === 0 && !apiKey && (
+        <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 text-sm" role="alert">
+          <p className="font-bold">API Key Missing</p>
+          <p>The Google Maps API key is not configured. Please set it in <code>src/store/index.ts</code>.</p>
+        </div>
+      )}
       {/* Progress bar */}
       <div className="h-1 bg-gray-100">
         <div 
@@ -66,7 +73,7 @@ const WizardNavigation: React.FC = () => {
         </button>
         
         <div className="flex space-x-3">
-          {step === 2 && (
+          {step === 2 && ( // Updated from step === 3 to step === 2 for ResultsStep
             <button
               onClick={handleReset}
               disabled={isCalculating}
@@ -81,7 +88,7 @@ const WizardNavigation: React.FC = () => {
             </button>
           )}
           
-          {step < 2 && (
+          {step < 2 && ( // Updated from step < 3 to step < 2
             <button
               onClick={handleNext}
               disabled={!canGoNext() || isCalculating}
@@ -91,7 +98,7 @@ const WizardNavigation: React.FC = () => {
                   : 'bg-blue-600 text-white hover:bg-blue-700'
               } transition duration-150`}
             >
-              {step === 1 ? 'Calculate' : 'Next'}
+              {step === 1 ? 'Calculate' : 'Next'} {/* Updated condition for 'Calculate' text (was step === 2) */}
               <ArrowRightIcon className="h-4 w-4 ml-2" />
             </button>
           )}
