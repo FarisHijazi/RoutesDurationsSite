@@ -40,6 +40,8 @@ alwaysApply: true
     *   Consider allowing users to add found gyms as destinations for route calculations.
 
 ### Potential Minor Enhancements & Polish:
+*   **General***:
+    *   in the results, the "Select Destination:" dropdown should not exist, and instead, there should be a bar plot with the times for each location, basically what I'm asking for is for you to unroll it so that the user doesn't have to interact with each one
 *   **Mobile Map Usability**:
     *   Further review map interactions on various mobile devices.
     *   Consider if explicit "double-click" functionality is truly needed (currently deemed low priority).

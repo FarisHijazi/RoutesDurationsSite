@@ -63,10 +63,9 @@ const ResultsCharts: React.FC = () => {
   // Get selected destination
   const selectedDestinationObj = destinations.find(d => d.id === selectedDestination);
   
-  // Filter results for selected destination
+  // Filter results for selected destination (all times)
   const destinationResults = useMemo(() => {
     if (!selectedDestination || !property) return [];
-    
     return routeResults.filter(
       r => r.fromId === property.id && r.toId === selectedDestination
     ).sort((a, b) => {
@@ -80,14 +79,11 @@ const ResultsCharts: React.FC = () => {
   // Prepare chart data
   const chartData = useMemo(() => {
     if (destinationResults.length === 0) return null;
-    
     const labels = destinationResults.map(r => {
       const timeOption = timeOptions.find(t => t.value === r.timeOption);
       return timeOption?.label || r.timeOption;
     });
-    
     const durations = destinationResults.map(r => Math.round(r.durationValue / 60)); // Convert to minutes
-    
     return {
       labels,
       datasets: [

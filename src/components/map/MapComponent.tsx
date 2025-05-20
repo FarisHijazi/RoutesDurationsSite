@@ -118,7 +118,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
       setMarkers(newMarkers);
       
       // Set bounds to include all markers if there are any
-      if (newMarkers.length > 0) {
+      if (newMarkers.length > 1) {
         const bounds = new google.maps.LatLngBounds();
         newMarkers.forEach(marker => {
           bounds.extend(marker.getPosition()!);

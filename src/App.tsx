@@ -25,7 +25,7 @@ function App() {
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
           {apiKey ? (
             <Wrapper apiKey={apiKey} libraries={['places', 'geocoding', 'routes']}>
-              <WizardContainer />
+          <WizardContainer />
             </Wrapper>
           ) : (
             <WizardContainer /> // Render WizardContainer directly if no API key, SetupStep will handle it

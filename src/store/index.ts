@@ -34,6 +34,8 @@ interface StoreState {
   routeResults: RouteResult[];
   isCalculating: boolean;
   error: string | null;
+  selectedTimeOption: string;
+  setSelectedTimeOption: (value: string) => void;
   setStep: (step: number) => void;
   addLocation: (location: Location) => void;
   removeLocation: (id: string) => void;
@@ -64,6 +66,8 @@ export const useStore = create<StoreState>((set) => ({
   routeResults: [],
   isCalculating: false,
   error: null,
+  selectedTimeOption: DEFAULT_TIME_OPTIONS.find(t => t.selected)?.value || DEFAULT_TIME_OPTIONS[0].value,
+  setSelectedTimeOption: (value) => set({ selectedTimeOption: value }),
   
   setStep: (step) => set({ step }),
   

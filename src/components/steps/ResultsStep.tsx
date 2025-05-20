@@ -65,40 +65,32 @@ const ResultsStep: React.FC = () => {
       <p className="text-gray-600 mb-6">
         Analysis of travel times between your property and destinations.
       </p>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <div className="lg:col-span-7">
-          <div className="bg-gray-100 rounded-lg overflow-hidden h-[400px]">
-            
-              <ResultsMap 
-                locations={locations}
-                results={routeResults}
-                isLoading={isCalculating}
-              />
-            
-          </div>
+      <div className="flex flex-col gap-8">
+        <div className="bg-gray-100 rounded-lg overflow-hidden h-[400px] w-full">
+          <ResultsMap 
+            locations={locations}
+            results={routeResults}
+            isLoading={isCalculating}
+          />
         </div>
-        
-        <div className="lg:col-span-5">
-          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-            <div className="p-4 space-y-6">
-              {isCalculating ? (
-                <div className="flex flex-col items-center justify-center py-16">
-                  <Loader2Icon className="h-12 w-12 text-blue-500 animate-spin mb-4" />
-                  <h3 className="text-lg font-medium text-gray-800 mb-2">Calculating Routes</h3>
-                  <p className="text-gray-500 text-center max-w-md">
-                    We're calculating routes between all your locations for the selected time periods.
-                    This may take a moment...
-                  </p>
-                </div>
-              ) : (
-                <>
-                  <ResultsSummary />
-                  <ResultsDetails />
-                  <ResultsCharts />
-                </>
-              )}
-            </div>
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden w-full">
+          <div className="p-4 space-y-6">
+            {isCalculating ? (
+              <div className="flex flex-col items-center justify-center py-16">
+                <Loader2Icon className="h-12 w-12 text-blue-500 animate-spin mb-4" />
+                <h3 className="text-lg font-medium text-gray-800 mb-2">Calculating Routes</h3>
+                <p className="text-gray-500 text-center max-w-md">
+                  We're calculating routes between all your locations for the selected time periods.
+                  This may take a moment...
+                </p>
+              </div>
+            ) : (
+              <>
+                <ResultsSummary />
+                <ResultsDetails />
+                <ResultsCharts />
+              </>
+            )}
           </div>
         </div>
       </div>
