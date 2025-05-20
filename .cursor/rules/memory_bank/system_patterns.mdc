@@ -9,23 +9,23 @@ alwaysApply: true
 The application follows a component-based architecture, typical of React applications. It is a single-page application (SPA) where UI updates are handled dynamically on the client-side.
 
 ### Key Architectural Components:
-*   **Wizard Flow Management**: `src/components/WizardContainer.tsx` orchestrates the step-by-step user journey. Includes `src/components/WizardNavigation.tsx` for step transitions.
+*   **Wizard Flow Management**: `src/components/WizardContainer.tsx` orchestrates the step-by-step user journey. Includes `src/components/WizardNavigation.tsx` for step transitions. (Note: `SetupStep.tsx` has been removed, API key is hardcoded).
 *   **Step Components (located in `src/components/steps/`)**:
-    *   `SetupStep.tsx`: Initial setup or welcome step (newly identified).
-    *   `LocationStep.tsx`: Handles user input for property and destination locations.
+    *   `LocationStep.tsx`: Handles user input for property and destination locations. Initializes Google Maps services like Geocoder and PlacesService after map libraries are confirmed loaded.
     *   `TimeSelectionStep.tsx`: Allows users to select multiple time slots.
-    *   `ResultsStep.tsx`: Displays the calculated results.
+    *   `ResultsStep.tsx`: Displays the calculated results, including a map.
 *   **Map Interaction (located in `src/components/map/`)**:
-    *   `MapComponent.tsx`: Provides the primary map interface for location selection.
+    *   `MapComponent.tsx`: Provides the primary map interface for location selection. Includes mobile-specific usability features like a center marker.
     *   `ResultsMap.tsx`: Visualizes routes and traffic information on the results page.
     *   `mapStyles.css`: Styles specific to map components.
 *   **Results Presentation (located in `src/components/results/`)**:
-    *   `ResultsSummary.tsx`: Offers a high-level overview of findings.
+    *   `ResultsSummary.tsx`: Offers a high-level overview of findings, sorted by average travel time.
     *   `ResultsDetails.tsx`: Presents a detailed breakdown of times and distances.
     *   `ResultsCharts.tsx`: Uses Chart.js to display travel data graphically.
 *   **State Management**: Centralized state is managed by Zustand, with the main store defined in `src/store/index.ts`.
-*   **API Service Layer**: `src/services/mapService.ts` encapsulates all interactions with the Google Maps API, abstracting the API calls from the UI components.
-*   **Core Application Entry**: `src/App.tsx` likely sets up the main application structure, and `src/main.tsx` initializes the React application.
+*   **API Service Layer**: `src/services/mapService.ts` encapsulates all interactions with the Google Maps API (Distance Matrix, and will include Places API for gym search), abstracting the API calls from the UI components.
+*   **Core Application Entry**: `src/App.tsx` sets up the main application structure and initializes the React application via `src/main.tsx`. It is also responsible for loading the Google Maps API script with all necessary libraries (`places`, `geocoding`, `routes`) using the `@googlemaps/react-wrapper` to ensure it's loaded once for the entire application.
+*   **Google Maps API Loading**: The Google Maps JavaScript API (including libraries for Places, Geocoding, and Routes) is loaded centrally in `App.tsx` using the `@googlemaps/react-wrapper`. This avoids conflicts that arise from multiple loader instances with different configurations.
 
 ## Key Technical Decisions
 *   **React with TypeScript**: Chosen for robust, type-safe frontend development and a rich ecosystem.
@@ -33,18 +33,19 @@ The application follows a component-based architecture, typical of React applica
 *   **Zustand**: A lightweight, minimalistic state management solution suitable for this project's scale.
 *   **TailwindCSS**: For utility-first CSS styling, enabling rapid UI development.
 *   **Chart.js**: For flexible and customizable data visualization.
-*   **Google Maps API**: The core enabler for routing and distance matrix calculations.
+*   **Google Maps API**: The core enabler for routing, geocoding, places, and distance matrix calculations. API key is hardcoded in the Zustand store.
 
 ## Design Patterns
 *   **Component-Based Architecture**: UI is broken down into reusable components.
-*   **Container/Presentational Pattern**: Likely used, where container components (`WizardContainer.tsx`, step components) manage logic and state, while presentational components focus on UI rendering.
-*   **Service Layer**: The `mapService.ts` acts as a service layer, decoupling API logic from the rest of the application.
+*   **Container/Presentational Pattern**: Generally observed, with step components managing logic and sub-components focusing on UI.
+*   **Service Layer**: The `mapService.ts` acts as a service layer.
 *   **Wizard Pattern**: The UI flow follows a sequential, multi-step process.
 
 ## Component Relationships
-*   `WizardContainer.tsx` renders the active step component (e.g., `SetupStep`, `LocationStep`, `TimeSelectionStep`, `ResultsStep`) and uses `WizardNavigation.tsx`.
-*   `LocationStep.tsx` and `ResultsStep.tsx` utilize `MapComponent.tsx` and `ResultsMap.tsx` respectively (from `src/components/map/`).
-*   `ResultsStep.tsx` aggregates and displays data using `ResultsSummary.tsx`, `ResultsDetails.tsx`, and `ResultsCharts.tsx` (from `src/components/results/`).
-*   All components that need access to or need to modify shared application data interact with the Zustand store defined in `src/store/index.ts`.
+*   `WizardContainer.tsx` renders the active step component (e.g., `LocationStep`, `TimeSelectionStep`, `ResultsStep`) and uses `WizardNavigation.tsx`.
+*   `App.tsx` wraps `WizardContainer` with the Google Maps `Wrapper` to provide a global API context.
+*   `LocationStep.tsx` uses `MapComponent.tsx` and initializes Google services, assuming libraries are loaded by the global `Wrapper`.
+*   `ResultsStep.tsx` uses `ResultsMap.tsx` and aggregates data using `ResultsSummary.tsx`, `ResultsDetails.tsx`, and `ResultsCharts.tsx`, assuming libraries are loaded by the global `Wrapper`.
+*   All components needing shared data interact with the Zustand store (`src/store/index.ts`).
 *   Components triggering map operations or data fetching call functions within `src/services/mapService.ts`.
 *   `App.tsx` is the root component rendered by `main.tsx`.

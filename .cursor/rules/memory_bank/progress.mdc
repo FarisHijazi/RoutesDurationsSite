@@ -10,13 +10,14 @@ alwaysApply: true
 *   A high-level architecture and key components have been outlined in `system_patterns.mdc`.
 *   Core project structure within `src/` exists, including entry points (`main.tsx`, `App.tsx`) and core component files.
 *   Key service `src/services/mapService.ts` and state management `src/store/index.ts` files are present and functional.
-*   **Wizard Flow and Navigation**: `WizardContainer.tsx` and `WizardNavigation.tsx` are implemented, including `SetupStep.tsx`.
+*   **API Key Handling**: API key is now hardcoded in `src/store/index.ts`, and the `SetupStep.tsx` has been removed. Wizard flow adjusted accordingly.
+*   **Wizard Flow and Navigation**: `WizardContainer.tsx` and `WizardNavigation.tsx` are implemented.
 *   **Step Component Implementation**:
-    *   `SetupStep.tsx`: Handles API key input.
-    *   `LocationStep.tsx`: Features map interaction, location searching (instant search, reverse geocoding), and a persistent panel for adding locations. Mobile usability enhanced with a center map marker.
+    *   `LocationStep.tsx`: Features map interaction, location searching (instant search, reverse geocoding triggered after libraries load), and a persistent panel for adding locations. Mobile usability enhanced with a center map marker. "Maximum update depth" error related to map marker fixed.
     *   `TimeSelectionStep.tsx`: Allows selection of multiple time slots.
-    *   `ResultsStep.tsx`: Displays results (map, summary, details, charts) in a continuous layout. `ResultsMap.tsx` loads necessary Google Maps libraries.
+    *   `ResultsStep.tsx`: Displays results (map, summary, details, charts) in a continuous layout.
 *   **Google Maps API Integration**: `mapService.ts` correctly fetches Distance Matrix data. Error handling for API calls in `ResultsStep.tsx` is improved.
+*   **Google Maps API Loader**: The Google Maps API (`@googlemaps/react-wrapper`) is now loaded centrally in `App.tsx` with all required libraries (`places`, `geocoding`, `routes`), resolving the "Loader must not be called again with different options" error. Components (`LocationStep`, `ResultsStep`) no longer manage their own API loader instances.
 *   **State Management**: `store/index.ts` effectively manages application state (API key, wizard step, locations, times, results).
 *   **Results Display Enhancements**:
     *   `ResultsSummary.tsx` now sorts destinations by average travel time.
@@ -25,6 +26,9 @@ alwaysApply: true
 ## What's Left to Build
 
 ### New Feature (Next Major Focus):
+*   **Results page**
+    * Fix the results page time plots in the "Trip Details" section, the time dropdown doesn't actually change the plots
+
 *   **User memory**
     * add a way so that user's locations are already saved and there for returning users
 *   **Remove the "Add location at map center" button
@@ -42,11 +46,14 @@ alwaysApply: true
 *   **Configuration**:
     *   Make `MOCK_MODE` in `mapService.ts` configurable or ensure it's disabled for production builds.
     *   Review other potentially hardcoded values (e.g., map zoom, `maxDuration` in `ResultsMap.tsx`) for configurability if beneficial.
+*   **Maps usability**:
+    *   Don't make the map zoom in when the user adds a location, there's no need for that
+
 
 ## Current Status
-*   **Phase**: Core Functionality Complete / New Feature Development.
-*   Core wizard flow, location selection, time selection, route calculation, and results display are implemented as per initial requirements and most enhancements.
-*   Focus is shifting to the "Find Closest Gym" feature.
+*   **Phase**: Core Functionality Implemented / New Feature Development.
+*   Core wizard flow, location selection, time selection, route calculation, and results display are implemented. Key bugs (API loader, map marker updates) have been resolved.
+*   Focus is shifting to the "User memory" and "Find Closest Gym" features.
 
 ## Known Issues
 *   **Ad Blocker Conflict**: Some ad blockers (e.g., uBlock Origin) may block certain Lucide icon files (like `fingerprint.js`).

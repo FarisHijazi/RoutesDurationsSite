@@ -1,5 +1,4 @@
 import React, { useEffect, useCallback } from 'react';
-import { Wrapper } from '@googlemaps/react-wrapper';
 import { useStore, Location } from '../../store';
 import ResultsMap from '../map/ResultsMap';
 import { calculateRoutes } from '../../services/mapService';
@@ -70,13 +69,13 @@ const ResultsStep: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div className="lg:col-span-7">
           <div className="bg-gray-100 rounded-lg overflow-hidden h-[400px]">
-            <Wrapper apiKey={apiKey} libraries={['places', 'routes']}>
+            
               <ResultsMap 
                 locations={locations}
                 results={routeResults}
                 isLoading={isCalculating}
               />
-            </Wrapper>
+            
           </div>
         </div>
         

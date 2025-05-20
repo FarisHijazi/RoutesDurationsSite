@@ -81,17 +81,20 @@ const ResultsSummary: React.FC = () => {
     return `${displayHour}:${minutes} ${ampm}`;
   };
   
+  // Sort destination groups by average duration (best to worst)
+  const sortedDestinationGroups = Object.values(destinationGroups).sort((a, b) => a.avgDuration - b.avgDuration);
+
   return (
     <div>
       <h3 className="text-lg font-medium text-gray-800 mb-4">Travel Summary</h3>
       
-      {Object.values(destinationGroups).length === 0 ? (
+      {sortedDestinationGroups.length === 0 ? (
         <div className="text-center py-4 text-gray-500">
           No destination data available.
         </div>
       ) : (
         <div className="space-y-4">
-          {Object.values(destinationGroups).map(({ destination, avgDuration, bestTime, worstTime, bestDuration, worstDuration }) => (
+          {sortedDestinationGroups.map(({ destination, avgDuration, bestTime, worstTime, bestDuration, worstDuration }) => (
             <div key={destination.id} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
               <div className="flex items-start">
                 <MapPinIcon className="h-5 w-5 text-red-500 mr-2 mt-0.5" />

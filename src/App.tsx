@@ -2,9 +2,10 @@ import React from 'react';
 import { MapPinIcon } from 'lucide-react';
 import WizardContainer from './components/WizardContainer';
 import { useStore } from './store';
+import { Wrapper } from '@googlemaps/react-wrapper';
 
 function App() {
-  const { step } = useStore();
+  const { step, apiKey } = useStore();
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -22,7 +23,13 @@ function App() {
       {/* Main Content */}
       <main className="flex-1 max-w-7xl w-full mx-auto py-8 px-6">
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          <WizardContainer />
+          {apiKey ? (
+            <Wrapper apiKey={apiKey} libraries={['places', 'geocoding', 'routes']}>
+              <WizardContainer />
+            </Wrapper>
+          ) : (
+            <WizardContainer /> // Render WizardContainer directly if no API key, SetupStep will handle it
+          )}
         </div>
       </main>
 

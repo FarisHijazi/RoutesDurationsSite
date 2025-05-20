@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { MapPinIcon, HomeIcon, BuildingIcon, XIcon, SearchIcon } from 'lucide-react';
-import { Wrapper } from '@googlemaps/react-wrapper';
 import { useStore, Location } from '../../store';
 import MapComponent from '../map/MapComponent';
 
@@ -15,7 +14,6 @@ const LocationStep: React.FC = () => {
   
   const geocoderRef = useRef<google.maps.Geocoder | null>(null);
   const placesServiceRef = useRef<google.maps.places.PlacesService | null>(null);
-  const [areLibrariesLoaded, setAreLibrariesLoaded] = useState(false);
 
   const hasProperty = locations.some(loc => loc.isProperty);
   
@@ -25,22 +23,20 @@ const LocationStep: React.FC = () => {
     }
   }, [hasProperty]);
 
-  // Initialize services once libraries are loaded
+  // Initialize services once libraries are loaded (now assumed to be loaded by App.tsx Wrapper)
   useEffect(() => {
-    if (areLibrariesLoaded) {
-      if (window.google && window.google.maps && window.google.maps.Geocoder) {
+    if (window.google && window.google.maps) {
+      if (window.google.maps.Geocoder) {
         geocoderRef.current = new google.maps.Geocoder();
       }
-      if (window.google && window.google.maps && window.google.maps.places && window.google.maps.places.PlacesService) {
-        // PlacesService constructor needs an HTMLDivElement attributions container, 
-        // it can be a detached element if not displaying attributions directly.
+      if (window.google.maps.places && window.google.maps.places.PlacesService) {
         placesServiceRef.current = new google.maps.places.PlacesService(document.createElement('div'));
       }
     }
-  }, [areLibrariesLoaded]);
+  }, []); // Runs once on mount
 
   const performSearch = useCallback((query: string) => {
-    if (!areLibrariesLoaded || !placesServiceRef.current || !query.trim()) {
+    if (!placesServiceRef.current || !query.trim()) {
       setSearchResults([]);
       return;
     }
@@ -54,7 +50,7 @@ const LocationStep: React.FC = () => {
         setSearchResults([]); // Clear results on error or no results
       }
     });
-  }, [areLibrariesLoaded]);
+  }, []);
 
   // Perform search directly when searchQuery changes
   useEffect(() => {
@@ -63,7 +59,7 @@ const LocationStep: React.FC = () => {
 
   // Reverse geocode when selectedPosition changes
   useEffect(() => {
-    if (areLibrariesLoaded && selectedPosition && geocoderRef.current) {
+    if (selectedPosition && geocoderRef.current) {
       geocoderRef.current.geocode({ location: selectedPosition }, (results, status) => {
         if (status === 'OK' && results && results[0]) {
           setLocationName(results[0].formatted_address);
@@ -72,7 +68,7 @@ const LocationStep: React.FC = () => {
         }
       });
     }
-  }, [selectedPosition, areLibrariesLoaded]);
+  }, [selectedPosition]);
 
   const handleSelectPlace = (place: google.maps.places.PlaceResult) => {
     if (place.geometry?.location) {
@@ -190,14 +186,11 @@ const LocationStep: React.FC = () => {
 
           <div className="bg-gray-100 rounded-lg overflow-hidden h-[400px]">
             {apiKey ? (
-              <Wrapper apiKey={apiKey} libraries={['places', 'geocoding']}>
                 <MapComponent 
                   locations={locations}
                   onPositionSelect={setSelectedPosition}
                   selectedPosition={selectedPosition}
-                  onLibrariesLoaded={() => setAreLibrariesLoaded(true)}
                 />
-              </Wrapper>
             ) : (
               <div className="w-full h-full flex items-center justify-center bg-gray-200">
                 <p className="text-gray-600 p-4 text-center">
