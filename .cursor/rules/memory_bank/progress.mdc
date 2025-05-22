@@ -6,58 +6,61 @@ alwaysApply: true
 # Progress: Google Maps Routing Distance Matrix Calculator
 
 ## What Works
-*   The technical stack has been decided and dependencies are listed in `package.json`.
-*   A high-level architecture and key components have been outlined in `system_patterns.mdc`.
-*   Core project structure within `src/` exists, including entry points (`main.tsx`, `App.tsx`) and core component files.
-*   Key service `src/services/mapService.ts` and state management `src/store/index.ts` files are present and functional.
-*   **API Key Handling**: API key is now hardcoded in `src/store/index.ts`, and the `SetupStep.tsx` has been removed. Wizard flow adjusted accordingly.
-*   **Wizard Flow and Navigation**: `WizardContainer.tsx` and `WizardNavigation.tsx` are implemented.
-*   **Step Component Implementation**:
-    *   `LocationStep.tsx`: Features map interaction, location searching (instant search, reverse geocoding triggered after libraries load), and a persistent panel for adding locations. Mobile usability enhanced with a center map marker. "Maximum update depth" error related to map marker fixed.
-    *   `TimeSelectionStep.tsx`: Allows selection of multiple time slots.
-    *   `ResultsStep.tsx`: Displays results (map, summary, details, charts) in a continuous layout.
-*   **Google Maps API Integration**: `mapService.ts` correctly fetches Distance Matrix data. Error handling for API calls in `ResultsStep.tsx` is improved.
-*   **Google Maps API Loader**: The Google Maps API (`@googlemaps/react-wrapper`) is now loaded centrally in `App.tsx` with all required libraries (`places`, `geocoding`, `routes`), resolving the "Loader must not be called again with different options" error. Components (`LocationStep`, `ResultsStep`) no longer manage their own API loader instances.
-*   **State Management**: `store/index.ts` effectively manages application state (API key, wizard step, locations, times, results).
-*   **Results Display Enhancements**:
-    *   `ResultsSummary.tsx` now sorts destinations by average travel time.
-    *   `ResultsStep.tsx` uses a continuous, back-to-back display for results components.
+- The technical stack has been decided and dependencies are listed in `package.json`.
+- A high-level architecture and key components have been outlined in `system_patterns.mdc`.
+- Core project structure within `src/` exists, including entry points (`main.tsx`, `App.tsx`) and core component files.
+- Key service `src/services/mapService.ts` and state management `src/store/index.ts` files are present and functional.
+- **API Key Handling**: API key is now hardcoded in `src/store/index.ts`, and the `SetupStep.tsx` has been removed. Wizard flow adjusted accordingly.
+- **Wizard Flow and Navigation**: `WizardContainer.tsx` and `WizardNavigation.tsx` are implemented.
+- **Step Component Implementation**:
+    - `LocationStep.tsx`: Features map interaction, location searching (instant search, reverse geocoding triggered after libraries load), and a persistent panel for adding locations. Mobile usability enhanced with a center map marker. "Maximum update depth" error related to map marker fixed.
+    - `TimeSelectionStep.tsx`: Allows selection of multiple time slots.
+    - `ResultsStep.tsx`: Displays results (map, summary, details, charts) in a **vertical, full-width, scrollable layout**. Table cropping/overflow is fixed. Map no longer zooms in when adding the first location.
+- **Google Maps API Integration**: `mapService.ts` correctly fetches Distance Matrix data. Error handling for API calls in `ResultsStep.tsx` is improved.
+- **Google Maps API Loader**: The Google Maps API (`@googlemaps/react-wrapper`) is now loaded centrally in `App.tsx` with all required libraries (`places`, `geocoding`, `routes`), resolving the "Loader must not be called again with different options" error. Components (`LocationStep`, `ResultsStep`) no longer manage their own API loader instances.
+- **State Management**: `store/index.ts` effectively manages application state (API key, wizard step, locations, times, results).
+- **Results Display Enhancements**:
+    - `ResultsSummary.tsx` now sorts destinations by average travel time.
+    - `ResultsStep.tsx` uses a continuous, back-to-back display for results components.
+    - Results tables are now horizontally scrollable and fully visible.
+    - Map does not zoom in when adding the first location.
 
 ## What's Left to Build
 
 ### New Feature (Next Major Focus):
-*   **Results page**
-    * Fix the results page time plots in the "Trip Details" section, the time dropdown doesn't actually change the plots
+- [ ] **Results page**
+    - [x] Fix the results page time plots in the "Trip Details" section, the time dropdown doesn't actually change the plots
+    - [ ] In the results page, remove the bar plots and instead use a confidence band plot. The X axis is the time across the day (6am-10pm etc), and the Y axis is the average travel time. The confidence band is the worst case and best case scenario.
+    - [ ] When building the confidence band plot, use a common X-axis for all the locations and repeat the Y-axis multiple times for each location, but make sure they are all the same scale.
+- [ ] **User memory**
+    - [ ] add a way so that user's locations are already saved and there for returning users
+- [ ] **Remove the "Add location at map center" button
 
-*   **User memory**
-    * add a way so that user's locations are already saved and there for returning users
-*   **Remove the "Add location at map center" button
-
-*   **Find Closest Gym**:
-    *   Design and implement UI for users to trigger a search for gyms near their primary property location.
-    *   Integrate Google Maps Places API for "gym" searches.
-    *   Display gym search results (map and list).
-    *   Consider allowing users to add found gyms as destinations for route calculations.
+- [ ] **Find Closest Gym**:
+    - [ ] Design and implement UI for users to trigger a search for gyms near their primary property location.
+    - [ ] Integrate Google Maps Places API for "gym" searches.
+    - [ ] Display gym search results (map and list).
+    - [ ] Consider allowing users to add found gyms as destinations for route calculations.
 
 ### Potential Minor Enhancements & Polish:
-*   **General***:
-    *   in the results, the "Select Destination:" dropdown should not exist, and instead, there should be a bar plot with the times for each location, basically what I'm asking for is for you to unroll it so that the user doesn't have to interact with each one
-*   **Mobile Map Usability**:
-    *   Further review map interactions on various mobile devices.
-    *   Consider if explicit "double-click" functionality is truly needed (currently deemed low priority).
-*   **Configuration**:
-    *   Make `MOCK_MODE` in `mapService.ts` configurable or ensure it's disabled for production builds.
-    *   Review other potentially hardcoded values (e.g., map zoom, `maxDuration` in `ResultsMap.tsx`) for configurability if beneficial.
-*   **Maps usability**:
-    *   Don't make the map zoom in when the user adds a location, there's no need for that
+- [ ] **General***:
+    - [ ] in the results, the "Select Destination:" dropdown should not exist, and instead, there should be a bar plot with the times for each location, basically what I'm asking for is for you to unroll it so that the user doesn't have to interact with each one
+- [ ] **Mobile Map Usability**:
+    - [ ] Further review map interactions on various mobile devices.
+    - [ ] Consider if explicit "double-click" functionality is truly needed (currently deemed low priority).
+- [ ] **Configuration**:
+    - [ ] Make `MOCK_MODE` in `mapService.ts` configurable or ensure it's disabled for production builds.
+    - [ ] Review other potentially hardcoded values (e.g., map zoom, `maxDuration` in `ResultsMap.tsx`) for configurability if beneficial.
+- [ ] **Maps usability**:
+    - [ ] Don't make the map zoom in when the user adds a location, there's no need for that
 
 
 ## Current Status
-*   **Phase**: Core Functionality Implemented / New Feature Development.
-*   Core wizard flow, location selection, time selection, route calculation, and results display are implemented. Key bugs (API loader, map marker updates) have been resolved.
-*   Focus is shifting to the "User memory" and "Find Closest Gym" features.
+- **Phase**: Core Functionality Implemented / New Feature Development.
+- Core wizard flow, location selection, time selection, route calculation, and results display are implemented. Key bugs (API loader, map marker updates, results layout, table cropping, map zoom) have been resolved.
+- Focus is shifting to the "User memory" and "Find Closest Gym" features.
 
 ## Known Issues
-*   **Ad Blocker Conflict**: Some ad blockers (e.g., uBlock Origin) may block certain Lucide icon files (like `fingerprint.js`).
-    *   **Action**: Monitor; if it becomes a recurring problem for users, investigate self-hosting icons or alternative icon libraries.
-    *   **Temporary Workaround**: Disable ad blocker or add an exception.
+- **Ad Blocker Conflict**: Some ad blockers (e.g., uBlock Origin) may block certain Lucide icon files (like `fingerprint.js`).
+    - **Action**: Monitor; if it becomes a recurring problem for users, investigate self-hosting icons or alternative icon libraries.
+    - **Temporary Workaround**: Disable ad blocker or add an exception.
