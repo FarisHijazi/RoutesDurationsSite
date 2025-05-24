@@ -21,7 +21,7 @@ The application follows a component-based architecture, typical of React applica
 *   **Results Presentation (located in `src/components/results/`)**:
     *   `ResultsSummary.tsx`: Offers a high-level overview of findings, sorted by average travel time.
     *   `ResultsDetails.tsx`: Presents a detailed breakdown of times and distances.
-    *   `ResultsCharts.tsx`: Uses Chart.js to display travel data graphically.
+    *   `ResultsCharts.tsx`: Uses Chart.js to display travel data graphically. **Confidence band plots require correct dataset order and fill config for area band rendering.**
 *   **State Management**: Centralized state is managed by Zustand, with the main store defined in `src/store/index.ts`.
 *   **API Service Layer**: `src/services/mapService.ts` encapsulates all interactions with the Google Maps API (Distance Matrix, and will include Places API for gym search), abstracting the API calls from the UI components.
 *   **Core Application Entry**: `src/App.tsx` sets up the main application structure and initializes the React application via `src/main.tsx`. It is also responsible for loading the Google Maps API script with all necessary libraries (`places`, `geocoding`, `routes`) using the `@googlemaps/react-wrapper` to ensure it's loaded once for the entire application.
@@ -32,7 +32,7 @@ The application follows a component-based architecture, typical of React applica
 *   **Vite**: Selected for its fast build times and modern development experience.
 *   **Zustand**: A lightweight, minimalistic state management solution suitable for this project's scale.
 *   **TailwindCSS**: For utility-first CSS styling, enabling rapid UI development.
-*   **Chart.js**: For flexible and customizable data visualization.
+*   **Chart.js**: For flexible and customizable data visualization. **Confidence band plots require correct dataset order and fill config for area band rendering.**
 *   **Google Maps API**: The core enabler for routing, geocoding, places, and distance matrix calculations. API key is hardcoded in the Zustand store.
 
 ## Design Patterns

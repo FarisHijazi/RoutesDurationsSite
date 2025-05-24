@@ -3,3 +3,26 @@ description:
 globs:
 alwaysApply: false
 ---
+# Solution: Confidence Band Plot Rendering in Chart.js
+
+## Problem
+Confidence bands were not rendering correctly in the results plot. The shaded area was missing or appeared below the average line, not between the best and worst case lines.
+
+## Error Messages
+- No visible band, or band filled from 0 to min instead of between min and max.
+- Chart.js fill config and dataset order issues.
+
+## Root Causes
+- Chart.js requires the dataset to be filled (max) to come after the target dataset (min) in the datasets array.
+- Incorrect fill config or dataset order causes the band to fill to the origin or not render at all.
+
+## Solution Steps
+- Order datasets as: Best Case (min), Worst Case (max, fill to 0), Average.
+- Set fill: { target: 0, above: color, below: color } on the 'Worst Case' dataset.
+- Set fill: false on the 'Best Case' and 'Average' datasets.
+
+## Verification
+- Bands now render correctly between best and worst case lines for each destination.
+
+## Future Improvements
+- Consider adding a legend or tooltip explanation for the confidence band.

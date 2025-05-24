@@ -39,6 +39,21 @@ const ResultsDetails: React.FC = () => {
     results: routeResults.filter(r => r.timeOption === time.value)
   }));
 
+  // Group by from/to for min/max/avg
+  const groupByFromTo = (results: typeof routeResults) => {
+    const map = new Map<string, { from: string, to: string, best_guess?: number, optimistic?: number, pessimistic?: number, distance?: string }>();
+    results.forEach(r => {
+      const key = `${r.fromId}|${r.toId}`;
+      if (!map.has(key)) {
+        map.set(key, { from: r.fromId, to: r.toId });
+      }
+      const entry = map.get(key)!;
+      entry[r.trafficModel] = r.durationValue;
+      entry.distance = r.distance;
+    });
+    return Array.from(map.values());
+  };
+
   return (
     <div>
       <h3 className="text-lg font-medium text-gray-800 mb-4">Trip Details</h3>
@@ -58,14 +73,16 @@ const ResultsDetails: React.FC = () => {
                   <tr>
                     <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">From</th>
                     <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">To</th>
-                    <th scope="col" className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">Time</th>
                     <th scope="col" className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">Distance</th>
+                    <th scope="col" className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">Best Case (min)</th>
+                    <th scope="col" className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">Average (min)</th>
+                    <th scope="col" className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">Worst Case (min)</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {results.map((result, idx) => {
-                    const fromLocation = findLocation(result.fromId);
-                    const toLocation = findLocation(result.toId);
+                  {groupByFromTo(results).map((row, idx) => {
+                    const fromLocation = findLocation(row.from);
+                    const toLocation = findLocation(row.to);
                     if (!fromLocation || !toLocation) return null;
                     return (
                       <tr key={idx} className="hover:bg-gray-50">
@@ -76,10 +93,16 @@ const ResultsDetails: React.FC = () => {
                           {toLocation.name}
                         </td>
                         <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-800 text-right">
-                          {formatTime(result.durationValue)}
+                          {row.distance}
                         </td>
                         <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-800 text-right">
-                          {result.distance}
+                          {row.optimistic !== undefined ? formatTime(row.optimistic) : '-'}
+                        </td>
+                        <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-800 text-right">
+                          {row.best_guess !== undefined ? formatTime(row.best_guess) : '-'}
+                        </td>
+                        <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-800 text-right">
+                          {row.pessimistic !== undefined ? formatTime(row.pessimistic) : '-'}
                         </td>
                       </tr>
                     );

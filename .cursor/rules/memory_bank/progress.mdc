@@ -24,14 +24,15 @@ alwaysApply: true
     - `ResultsStep.tsx` uses a continuous, back-to-back display for results components.
     - Results tables are now horizontally scrollable and fully visible.
     - Map does not zoom in when adding the first location.
+- **Confidence Band Plot**: The results page now displays a confidence band plot for each destination, with the band correctly rendered between best and worst case lines, and all plots sharing a global Y-axis scale. Chart.js dataset order and fill config are critical for correct band rendering.
 
 ## What's Left to Build
 
 ### New Feature (Next Major Focus):
 - [ ] **Results page**
     - [x] Fix the results page time plots in the "Trip Details" section, the time dropdown doesn't actually change the plots
-    - [ ] In the results page, remove the bar plots and instead use a confidence band plot. The X axis is the time across the day (6am-10pm etc), and the Y axis is the average travel time. The confidence band is the worst case and best case scenario.
-    - [ ] When building the confidence band plot, use a common X-axis for all the locations and repeat the Y-axis multiple times for each location, but make sure they are all the same scale.
+    - [x] In the results page, remove the bar plots and instead use a confidence band plot. The X axis is the time across the day (6am-10pm etc), and the Y axis is the average travel time. The confidence band is the worst case and best case scenario.
+    - [x] When building the confidence band plot, use a common X-axis for all the locations and repeat the Y-axis multiple times for each location, but make sure they are all the same scale.
 - [ ] **User memory**
     - [ ] add a way so that user's locations are already saved and there for returning users
 - [ ] **Remove the "Add location at map center" button

@@ -24,6 +24,7 @@ export interface RouteResult {
   durationValue: number;
   distanceValue: number;
   timeOption: string;
+  trafficModel: 'best_guess' | 'optimistic' | 'pessimistic';
 }
 
 interface StoreState {
