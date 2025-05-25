@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useState } from 'react';
 import { useStore, Location } from '../../store';
 import ResultsMap from '../map/ResultsMap';
 import { calculateRoutes } from '../../services/mapService';
@@ -19,6 +19,8 @@ const ResultsStep: React.FC = () => {
     setError 
   } = useStore();
   
+  const [showDetails, setShowDetails] = useState(false);
+
   const runCalculations = useCallback(async (
     property: Location, 
     destinations: Location[], 
@@ -60,39 +62,28 @@ const ResultsStep: React.FC = () => {
   }, [locations, timeOptions, routeResults, isCalculating, runCalculations]);
 
   return (
-    <div>
-      <h2 className="text-2xl font-bold text-gray-800 mb-2">Results</h2>
-      <p className="text-gray-600 mb-6">
-        Analysis of travel times between your property and destinations.
-      </p>
-      <div className="flex flex-col gap-8">
-        <div className="bg-gray-100 rounded-lg overflow-hidden h-[400px] w-full">
-          <ResultsMap 
-            locations={locations}
-            results={routeResults}
-            isLoading={isCalculating}
-          />
-        </div>
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden w-full">
-          <div className="p-4 space-y-6">
-            {isCalculating ? (
-              <div className="flex flex-col items-center justify-center py-16">
-                <Loader2Icon className="h-12 w-12 text-blue-500 animate-spin mb-4" />
-                <h3 className="text-lg font-medium text-gray-800 mb-2">Calculating Routes</h3>
-                <p className="text-gray-500 text-center max-w-md">
-                  We're calculating routes between all your locations for the selected time periods.
-                  This may take a moment...
-                </p>
-              </div>
-            ) : (
-              <>
-                <ResultsSummary />
-                <ResultsDetails />
-                <ResultsCharts />
-              </>
-            )}
+    <div className="flex flex-col gap-8 w-full">
+      <div className="bg-gray-100 rounded-lg overflow-hidden h-[400px] w-full">
+        <ResultsMap 
+          locations={locations}
+          results={routeResults}
+          isLoading={isCalculating}
+        />
+      </div>
+      <ResultsSummary />
+      <ResultsCharts />
+      <div className="mt-4">
+        <button
+          className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 text-gray-800 font-medium mb-2"
+          onClick={() => setShowDetails(v => !v)}
+        >
+          {showDetails ? 'Hide' : 'Show'} Trip detailed times
+        </button>
+        {showDetails && (
+          <div className="mt-2">
+            <ResultsDetails />
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
