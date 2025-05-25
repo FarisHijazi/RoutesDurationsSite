@@ -68,7 +68,7 @@ const DEFAULT_TIME_OPTIONS: TimeOption[] = [
 ];
 
 export const useStore = create<StoreState>((set) => ({
-  apiKey: '***REMOVED***',
+  apiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string,
   step: 0,
   locations: [],
   timeOptions: DEFAULT_TIME_OPTIONS,
