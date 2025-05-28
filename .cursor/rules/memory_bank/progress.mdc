@@ -30,36 +30,51 @@ alwaysApply: true
 
 ### New Feature (Next Major Focus):
 - [ ] **Results page**
+    - [ ] The textfield for searching and adding new locations should search for places closest to the user's property location location (which is the first location added).
     - [x] Fix the results page time plots in the "Trip Details" section, the time dropdown doesn't actually change the plots
     - [x] In the results page, remove the bar plots and instead use a confidence band plot. The X axis is the time across the day (6am-10pm etc), and the Y axis is the average travel time. The confidence band is the worst case and best case scenario.
     - [x] When building the confidence band plot, use a common X-axis for all the locations and repeat the Y-axis multiple times for each location, but make sure they are all the same scale.
-- [ ] **User memory**
-    - [ ] add a way so that user's locations are already saved and there for returning users
 - [ ] **Remove the "Add location at map center" button
 
-- [ ] **Find Closest Gym**:
-    - [ ] Design and implement UI for users to trigger a search for gyms near their primary property location.
-    - [ ] Integrate Google Maps Places API for "gym" searches.
-    - [ ] Display gym search results (map and list).
-    - [ ] Consider allowing users to add found gyms as destinations for route calculations.
+- [ ] **Find Closest facilities**:
+    - facilities are defined as: 🏋️ gyms, 🧺 laundry mats, 🏪 minimarkets )بقالة(, and ⛽ fuel stations.
+    - [ ] Design and implement a new step that's after the first step that adds the destinations, and before the one that sets the time, this page will be extremely similar to the first page, it will allow users to add new textfields for these facilities facilities. The above facilities should always be added as the default values, and the user can add or remove those textfields, once the user is done, they can press next. These can be checked and unchecked on the maps destinations selection page, the user can then add a button "Add facilities".
+    - [ ] Display facilities search results (map and list).
+- [ ] add the ability to print the results page as a report
+- [ ] in the results page plot, have Google maps color codes: red for durations above 30 minutes, yellow for durations between 10 minutes and 30 minutes, and blue for durations below 10 minutes.
 
 ### Potential Minor Enhancements & Polish:
-- [ ] **General***:
-    - [ ] in the results, the "Select Destination:" dropdown should not exist, and instead, there should be a bar plot with the times for each location, basically what I'm asking for is for you to unroll it so that the user doesn't have to interact with each one
-- [ ] **Mobile Map Usability**:
+- [ ] **fix warnings**:
+    - [ ] fix these deprecation warnings for the google maps APIs:
+        ```
+        places.js:1087 As of March 1st, 2025, google.maps.places.PlacesService is not available to new customers. Please use google.maps.places.Place instead. At this time, google.maps.places.PlacesService is not scheduled to be discontinued, but google.maps.places.Place is recommended over google.maps.places.PlacesService. While google.maps.places.PlacesService will continue to receive bug fixes for any major regressions, existing bugs in google.maps.places.PlacesService will not be addressed. At least 12 months notice will be given before support is discontinued. Please see https://developers.google.com/maps/legacy for additional details and https://developers.google.com/maps/documentation/javascript/places-migration-overview for the migration guide.
+        HC	@	places.js:1087
+        (anonymous)	@	LocationStep.tsx:33
+        places.js:1087 As of March 1st, 2025, google.maps.places.PlacesService is not available to new customers. Please use google.maps.places.Place instead. At this time, google.maps.places.PlacesService is not scheduled to be discontinued, but google.maps.places.Place is recommended over google.maps.places.PlacesService. While google.maps.places.PlacesService will continue to receive bug fixes for any major regressions, existing bugs in google.maps.places.PlacesService will not be addressed. At least 12 months notice will be given before support is discontinued. Please see https://developers.google.com/maps/legacy for additional details and https://developers.google.com/maps/documentation/javascript/places-migration-overview for the migration guide.
+        HC	@	places.js:1087
+        (anonymous)	@	LocationStep.tsx:33
+        main.js:177 As of February 21st, 2024, google.maps.Marker is deprecated. Please use google.maps.marker.AdvancedMarkerElement instead. At this time, google.maps.Marker is not scheduled to be discontinued, but google.maps.marker.AdvancedMarkerElement is recommended over google.maps.Marker. While google.maps.Marker will continue to receive bug fixes for any major regressions, existing bugs in google.maps.Marker will not be addressed. At least 12 months notice will be given before support is discontinued. Please see https://developers.google.com/maps/deprecations for additional details and https://developers.google.com/maps/documentation/javascript/advanced-markers/migration for the migration guide.
+        _.vl	@	main.js:177
+        (anonymous)	@	MapComponent.tsx:142
+        Chrome is moving towards a new experience that allows users to choose to browse without third-party cookies.
+        ```
+- [ ] in the results, page the checkboxes that enable and disable the confidence band plots are actually changing the colors of the plots, it seems that the plots colors are based on the index of the plot, the first plot is always blue, and the second is green, and the third is yellow. I think the best solution is to explicitly generate random colors and that way they'll be explicitly assigned to each plot.
+- [x] in the results, the "Select Destination:" dropdown should not exist, and instead, there should be a bar plot with the times for each location, basically what I'm asking for is for you to unroll it so that the user doesn't have to interact with each one
+- **Mobile Map Usability**:
     - [ ] Further review map interactions on various mobile devices.
     - [ ] Consider if explicit "double-click" functionality is truly needed (currently deemed low priority).
-- [ ] **Configuration**:
+- **Configuration**:
     - [ ] Make `MOCK_MODE` in `mapService.ts` configurable or ensure it's disabled for production builds.
     - [ ] Review other potentially hardcoded values (e.g., map zoom, `maxDuration` in `ResultsMap.tsx`) for configurability if beneficial.
-- [ ] **Maps usability**:
-    - [ ] Don't make the map zoom in when the user adds a location, there's no need for that
+- **Maps usability in the destinations selection page (first page)**:
+    - [ ] Don't make the map zoom in when the user adds a location using the pins, there's no need for that. However, make sure that the map does zoom when the user adds a location using the search bar. This logic should apply even for the first location.
+    - [ ] when typing in the search bar, currently, pressing ENTER does nothing, please make it add the first choice.
 
 
 ## Current Status
 - **Phase**: Core Functionality Implemented / New Feature Development.
 - Core wizard flow, location selection, time selection, route calculation, and results display are implemented. Key bugs (API loader, map marker updates, results layout, table cropping, map zoom) have been resolved.
-- Focus is shifting to the "User memory" and "Find Closest Gym" features.
+- Focus is shifting to "Find Closest Facilities" feature.
 
 ## Known Issues
 - **Ad Blocker Conflict**: Some ad blockers (e.g., uBlock Origin) may block certain Lucide icon files (like `fingerprint.js`).

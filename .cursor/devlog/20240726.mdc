@@ -26,3 +26,47 @@ Confidence bands were not rendering correctly in the results plot. The shaded ar
 
 ## Future Improvements
 - Consider adding a legend or tooltip explanation for the confidence band.
+
+---
+
+# Solution: React Hooks Order Bug in ResultsCharts
+
+## Problem
+React threw a 'Rendered more hooks than during the previous render' error in ResultsCharts. This was caused by calling hooks (useState, useMemo, useEffect) after early returns for missing data.
+
+## Error Messages
+- Warning: React has detected a change in the order of Hooks called by ResultsCharts.
+- Uncaught Error: Rendered more hooks than during the previous render.
+
+## Root Cause
+- Early returns before all hooks were called, causing React to see a different number/order of hooks between renders.
+
+## Solution Steps
+- Move all hooks (useState, useMemo, useEffect) to the top of the component, before any early returns.
+- Only do conditional returns after all hooks have been called.
+
+## Code Example
+
+**Wrong (causes error):**
+```tsx
+function MyComponent(props) {
+  if (!props.data) return <div>No data</div>;
+  const [state, setState] = useState(0); // This hook is not always called!
+  // ...
+}
+```
+
+**Right (always safe):**
+```tsx
+function MyComponent(props) {
+  const [state, setState] = useState(0); // Always called
+  if (!props.data) return <div>No data</div>;
+  // ...
+}
+```
+
+## Verification
+- The error is gone and the component renders correctly.
+
+## Future Improvements
+- Always call hooks at the top of every React function component, before any conditional logic or returns.

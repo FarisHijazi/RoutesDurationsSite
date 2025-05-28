@@ -49,6 +49,15 @@ const ResultsCharts: React.FC = () => {
   const [visible, setVisible] = useState<{ [id: string]: boolean }>({});
   const [hovered, setHovered] = useState<string | null>(null);
 
+  // Assign a unique, persistent color to each destination based on its ID
+  function getColorMap(bands: ConfidenceBandData[]): Record<string, string> {
+    const colorMap: Record<string, string> = {};
+    bands.forEach((band, idx) => {
+      colorMap[band.destinationId] = COLORS[idx % COLORS.length];
+    });
+    return colorMap;
+  }
+
   // Prepare data for confidence band plot
   const confidenceBandData: ConfidenceBandData[] = useMemo(() => {
     const property = locations.find(loc => loc.isProperty);
@@ -92,6 +101,9 @@ const ResultsCharts: React.FC = () => {
     });
   }, [locations, routeResults, timeOptions]);
 
+  // Assign persistent colors to each destination
+  const colorMap = useMemo(() => getColorMap(confidenceBandData), [confidenceBandData]);
+
   // X-axis labels
   const timeLabels = timeOptions.map(t => t.label);
 
@@ -123,50 +135,55 @@ const ResultsCharts: React.FC = () => {
 
   // Build datasets for all visible destinations
   const visibleBands = confidenceBandData.filter(band => visible[band.destinationId]);
-  const datasets = visibleBands.flatMap((band, i) => {
-    const color = COLORS[i % COLORS.length];
+  // Build datasets and keep track of Best Case indices
+  const datasets: any[] = [];
+  visibleBands.forEach((band) => {
+    const color = colorMap[band.destinationId] || COLORS[0];
     const baseAlpha = hovered && hovered !== band.destinationId ? '0.10' : '0.25';
     const strongAlpha = hovered === band.destinationId ? '0.5' : baseAlpha;
-    return [
-      {
-        label: `${band.destinationName} (Best Case)`,
-        data: band.min,
-        fill: false,
-        backgroundColor: color.replace('1)', `${baseAlpha})`),
-        borderColor: 'rgba(0,0,0,0)',
-        pointRadius: 0,
-        type: 'line' as const,
-        order: 1,
-        tension: 0.3,
-        showLine: false,
-        datakey: band.destinationId + '-min',
-      },
-      {
-        label: `${band.destinationName} (Worst Case)`,
-        data: band.max,
-        fill: { target: i * 3, above: color.replace('1)', `${strongAlpha})`), below: color.replace('1)', `${strongAlpha})`) },
-        backgroundColor: color.replace('1)', `${strongAlpha})`),
-        borderColor: 'rgba(0,0,0,0)',
-        pointRadius: 0,
-        type: 'line' as const,
-        order: hovered === band.destinationId ? 99 : 2,
-        tension: 0.3,
-        showLine: false,
-        datakey: band.destinationId + '-max',
-      },
-      {
-        label: `${band.destinationName} (Average)`,
-        data: band.avg,
-        fill: false,
-        borderColor: hovered === band.destinationId ? color : color.replace('1)', `${baseAlpha})`),
-        backgroundColor: hovered === band.destinationId ? color : color.replace('1)', `${baseAlpha})`),
-        pointRadius: 3,
-        type: 'line' as const,
-        order: hovered === band.destinationId ? 100 : 3,
-        tension: 0.3,
-        datakey: band.destinationId + '-avg',
-      },
-    ];
+    // Index of Best Case dataset (will be datasets.length before push)
+    const bestCaseIndex = datasets.length;
+    // Best Case (min)
+    datasets.push({
+      label: `${band.destinationName} (Best Case)`,
+      data: band.min,
+      fill: false,
+      backgroundColor: color.replace('1)', `${baseAlpha})`),
+      borderColor: 'rgba(0,0,0,0)',
+      pointRadius: 0,
+      type: 'line' as const,
+      order: 1,
+      tension: 0.3,
+      showLine: false,
+      datakey: band.destinationId + '-min',
+    });
+    // Worst Case (max) - fill to Best Case
+    datasets.push({
+      label: `${band.destinationName} (Worst Case)`,
+      data: band.max,
+      fill: { target: bestCaseIndex, above: color.replace('1)', `${strongAlpha})`), below: color.replace('1)', `${strongAlpha})`) },
+      backgroundColor: color.replace('1)', `${strongAlpha})`),
+      borderColor: 'rgba(0,0,0,0)',
+      pointRadius: 0,
+      type: 'line' as const,
+      order: hovered === band.destinationId ? 99 : 2,
+      tension: 0.3,
+      showLine: false,
+      datakey: band.destinationId + '-max',
+    });
+    // Average (best_guess)
+    datasets.push({
+      label: `${band.destinationName} (Average)`,
+      data: band.avg,
+      fill: false,
+      borderColor: hovered === band.destinationId ? color : color.replace('1)', `${baseAlpha})`),
+      backgroundColor: hovered === band.destinationId ? color : color.replace('1)', `${baseAlpha})`),
+      pointRadius: 3,
+      type: 'line' as const,
+      order: hovered === band.destinationId ? 100 : 3,
+      tension: 0.3,
+      datakey: band.destinationId + '-avg',
+    });
   });
 
   const chartData = {
@@ -259,14 +276,14 @@ const ResultsCharts: React.FC = () => {
     <div>
       <h3 className="text-lg font-medium text-gray-800 mb-4">Travel Time Analysis</h3>
       <div className="flex flex-wrap gap-4 mb-4">
-        {confidenceBandData.map((band, i) => (
+        {confidenceBandData.map((band) => (
           <label key={band.destinationId} className="flex items-center gap-2 cursor-pointer">
             <input
               type="checkbox"
               checked={visible[band.destinationId] ?? true}
               onChange={e => setVisible(v => ({ ...v, [band.destinationId]: e.target.checked }))}
             />
-            <span style={{ color: COLORS[i % COLORS.length] }}>{band.destinationName}</span>
+            <span style={{ color: colorMap[band.destinationId] || COLORS[0] }}>{band.destinationName}</span>
           </label>
         ))}
       </div>
