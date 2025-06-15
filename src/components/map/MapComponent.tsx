@@ -189,7 +189,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
             onClick={handleAddCenterLocation} 
             className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 bg-blue-600 text-white px-4 py-2 rounded-md shadow-lg text-sm"
           >
-            Add Location at Map Center
+            Add Pin at Map Center
           </button>
       )}
     </div>

@@ -51,5 +51,5 @@ The application features a wizard-style user interface that guides users through
     *   Order results by: Best, Average, Worst.
     *   Change the results page layout from tabs to a continuous, back-to-back display of sections.
 *   **New Feature**:
-    *   Add an option for users to find the "closest" gym to their specified property location.
+    *   Add an option for users to find the "closest" facilities to their specified property location (facilities mean gym, laundrymat, gas station, etc).
 
