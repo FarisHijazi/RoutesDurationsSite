@@ -13,7 +13,7 @@ alwaysApply: true
 - **API Key Handling**: API key is now hardcoded in `src/store/index.ts`, and the `SetupStep.tsx` has been removed. Wizard flow adjusted accordingly.
 - **Wizard Flow and Navigation**: `WizardContainer.tsx` and `WizardNavigation.tsx` are implemented.
 - **Step Component Implementation**:
-    - `LocationStep.tsx`: Features map interaction, location searching (instant search, reverse geocoding triggered after libraries load), and a persistent panel for adding locations. Mobile usability enhanced with a center map marker. "Maximum update depth" error related to map marker fixed.
+    - `LocationStep.tsx`: Features enhanced map interaction (`dblclick` on desktop, `idle` event on mobile to select location), location searching with results biased toward the property location, and a persistent panel for adding/managing locations. Mobile usability is improved with a sticky center marker and automatic pin placement. A dedicated marker also shows the user's current geolocation.
     - `TimeSelectionStep.tsx`: Allows selection of multiple time slots.
     - `ResultsStep.tsx`: Displays results (map, summary, details, charts) in a **vertical, full-width, scrollable layout**. Table cropping/overflow is fixed. Map no longer zooms in when adding the first location.
 - **Google Maps API Integration**: `mapService.ts` correctly fetches Distance Matrix data. Error handling for API calls in `ResultsStep.tsx` is improved.
@@ -29,15 +29,20 @@ alwaysApply: true
 
 ## Major features:
 
-- **Locaiton selection page**
 - **location selection page**
-    - [ ] start with the first pin already dropped in the current user's location, dropped but not confirmed/added as the location
+    - [x] when I double click on the map, I want the pin to be added at the location of the double click.
+    - [x] start with the first pin already dropped in the current user's location, dropped but not confirmed/added as the location
+    - [x] remove "Add Pin at Map Center" button for mobile mode and instead make the pin get dropped at the center whenever the map moves, make sure to have a logo/icon at the center of the map.
+    - [x] add an icon/marker for where the user's current location is, don't add a location, just to let the user know where they are.
+    - [x] The textfield for searching and adding new locations should sort search results for places closest to the user's property location (which is the first location added).
+    - [ ] I want the "confirm location details:" textfield to click the "Add This Location" button, when ENTER is pressed.
+    - [ ] when text searching for a location and adding it, you already have the place name in the search results, so you can use that info to put it in the "Enter destination name" textfield, rather than an ugly address.
 - [ ] **New major feature: Find Closest facilities**:
     - facilities are defined as: 🏋️ gyms, 🧺 laundry mats, 🏪 minimarkets )بقالة(, and ⛽ fuel stations.
-    - [ ] Design and implement a new step that's after the first step that adds the destinations, and before the one that sets the time, this page will be extremely similar to the first page, it will allow users to add new textfields for these facilities facilities. The above facilities should always be added as the default values, and the user can add or remove those textfields, once the user is done, they can press next. These can be checked and unchecked on the maps destinations selection page, the user can then add a button "Add facilities".
-    - [ ] Display facilities search results (map and list).
+    - [ ] In the location selection page, add a section at the bottom of the page that allows the user to add facilities. The above facilities should always be added as the default values, and the user can add or remove those textfields, once the user is done, they can press next. These can be checked and unchecked on the maps destinations selection page, the user can then add a button "Add facilities". As the user adds locations, they get added to the map
 - **Results page**
-    - [ ] The textfield for searching and adding new locations should sort search results for places closest to the user's property location (which is the first location added).
+    - [ ] MAJOR BUG: the MOCK_MODE is not identical to the actual API, the entire website is built on the MOCK, so please change the actual non-MOCK functions so that they look like the MOCK functions
+    - [ ] MAJOR BUG: the results page travel summary does not show the actual Best and worst and average time, rather, it uses 6 AM and 8 AM. Please actually use all the times to get proper statistics.
     - [x] Fix the results page time plots in the "Trip Details" section, the time dropdown doesn't actually change the plots
     - [x] In the results page, remove the bar plots and instead use a confidence band plot. The X axis is the time across the day (6am-10pm etc), and the Y axis is the average travel time. The confidence band is the worst case and best case scenario.
     - [x] When building the confidence band plot, use a common X-axis for all the locations and repeat the Y-axis multiple times for each location, but make sure they are all the same scale.
@@ -53,9 +58,6 @@ alwaysApply: true
 - **Configuration**:
     - [ ] Make `MOCK_MODE` in `mapService.ts` configurable or ensure it's disabled for production builds.
     - [ ] Review other potentially hardcoded values (e.g., map zoom, `maxDuration` in `ResultsMap.tsx`) for configurability if beneficial.
-- **Maps usability in the destinations selection page (first page)**:
-    - [ ] Don't make the map zoom in when the user adds a location using the pins, there's no need for that. However, make sure that the map does zoom when the user adds a location using the search bar. This logic should apply even for the first location.
-    - [ ] when typing in the search bar, currently, pressing ENTER does nothing, please make it add the first choice.
 
 - [ ] fix issue where some scripts are blocked by Ublock origin (website works when disabling ublock origin):
     ```

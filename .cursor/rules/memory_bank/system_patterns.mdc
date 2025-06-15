@@ -11,11 +11,11 @@ The application follows a component-based architecture, typical of React applica
 ### Key Architectural Components:
 *   **Wizard Flow Management**: `src/components/WizardContainer.tsx` orchestrates the step-by-step user journey. Includes `src/components/WizardNavigation.tsx` for step transitions. (Note: `SetupStep.tsx` has been removed, API key is hardcoded).
 *   **Step Components (located in `src/components/steps/`)**:
-    *   `LocationStep.tsx`: Handles user input for property and destination locations. Initializes Google Maps services like Geocoder and PlacesService after map libraries are confirmed loaded.
+    *   `LocationStep.tsx`: Handles user input for property and destination locations. It uses `MapComponent` for map interactions and provides location search functionality via Google Places API, with results biased towards the primary property's location. Initializes Google services like Geocoder and PlacesService.
     *   `TimeSelectionStep.tsx`: Allows users to select multiple time slots.
     *   `ResultsStep.tsx`: Displays the calculated results, including a map.
 *   **Map Interaction (located in `src/components/map/`)**:
-    *   `MapComponent.tsx`: Provides the primary map interface for location selection. Includes mobile-specific usability features like a center marker.
+    *   `MapComponent.tsx`: Provides the primary map interface for location selection. Handles `dblclick` events for pin placement on desktop and uses the `idle` map event on mobile to select the location at the map's center. It also displays a marker for the user's current geolocation.
     *   `ResultsMap.tsx`: Visualizes routes and traffic information on the results page.
     *   `mapStyles.css`: Styles specific to map components.
 *   **Results Presentation (located in `src/components/results/`)**:

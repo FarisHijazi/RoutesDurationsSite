@@ -19,13 +19,12 @@ const MapComponent: React.FC<MapComponentProps> = ({
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [markers, setMarkers] = useState<google.maps.Marker[]>([]);
   const [tempMarker, setTempMarker] = useState<google.maps.Marker | null>(null);
+  const [userLocationMarker, setUserLocationMarker] = useState<google.maps.Marker | null>(null);
   const [isMobileView, setIsMobileView] = useState(window.innerWidth < 768);
-  const [centerMarkerVisible, setCenterMarkerVisible] = useState(false);
 
   const handleResize = useCallback(() => {
     const mobile = window.innerWidth < 768;
     setIsMobileView(mobile);
-    setCenterMarkerVisible(mobile);
   }, []);
 
   useEffect(() => {
@@ -57,6 +56,25 @@ const MapComponent: React.FC<MapComponentProps> = ({
               lng: position.coords.longitude,
             };
             mapInstance.setCenter(pos);
+            onPositionSelect(pos);
+
+            if (userLocationMarker) {
+              userLocationMarker.setMap(null);
+            }
+            const marker = new google.maps.Marker({
+              position: pos,
+              map: mapInstance,
+              title: 'Your Location',
+              icon: {
+                path: google.maps.SymbolPath.CIRCLE,
+                scale: 8,
+                fillColor: '#4285F4',
+                fillOpacity: 1,
+                strokeWeight: 2,
+                strokeColor: 'white',
+              }
+            });
+            setUserLocationMarker(marker);
           },
           () => {
             // Handle geolocation error silently
@@ -64,18 +82,27 @@ const MapComponent: React.FC<MapComponentProps> = ({
         );
       }
       
-      // Add click listener (only if not in mobile view with center marker)
-      mapInstance.addListener('click', (event: google.maps.MapMouseEvent) => {
-        if (event.latLng) {
+      // Add dblclick listener for non-mobile
+      mapInstance.addListener('dblclick', (event: google.maps.MapMouseEvent) => {
+        if (!isMobileView && event.latLng) {
           const position = {
             lat: event.latLng.lat(),
             lng: event.latLng.lng(),
           };
           onPositionSelect(position);
-          if (isMobileView) setCenterMarkerVisible(false);
         }
       });
       
+      // On mobile, select the center when the map becomes idle
+      mapInstance.addListener('idle', () => {
+        if (isMobileView) {
+          const center = mapInstance.getCenter();
+          if (center) {
+            onPositionSelect({ lat: center.lat(), lng: center.lng() });
+          }
+        }
+      });
+
       setMap(mapInstance);
       if (onLibrariesLoaded) {
         onLibrariesLoaded();
@@ -133,11 +160,11 @@ const MapComponent: React.FC<MapComponentProps> = ({
     }
   }, [map, locations]);
   
-  // Handle temporary marker for selection (non-mobile or when center marker is hidden)
+  // Handle temporary marker for selection (non-mobile only)
   useEffect(() => {
     let markerToSet: google.maps.Marker | null = null;
 
-    if (map && selectedPosition && !centerMarkerVisible) {
+    if (map && selectedPosition && !isMobileView) {
       // Create a new marker instance if conditions are met
       markerToSet = new google.maps.Marker({
         position: selectedPosition,
@@ -161,36 +188,17 @@ const MapComponent: React.FC<MapComponentProps> = ({
         markerToSet.setMap(null);
       }
     };
-  }, [map, selectedPosition?.lat, selectedPosition?.lng, centerMarkerVisible]); // Use lat/lng for dependency to avoid loop
-  
-  // Callback for mobile "Add Location at Center" button
-  const handleAddCenterLocation = useCallback(() => {
-    if (map) {
-      const center = map.getCenter();
-      if (center) {
-        onPositionSelect({ lat: center.lat(), lng: center.lng() });
-        setCenterMarkerVisible(false);
-      }
-    }
-  }, [map, onPositionSelect]);
+  }, [map, selectedPosition?.lat, selectedPosition?.lng, isMobileView]); // Use lat/lng for dependency to avoid loop
 
   return (
     <div className="relative w-full h-full">
       <div ref={mapRef} className="w-full h-full" />
-      {isMobileView && centerMarkerVisible && (
+      {isMobileView && (
         <div 
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-10"
         >
           <MapPinIcon className="h-10 w-10 text-blue-600" style={{ transform: 'translateY(-50%)' }} />
         </div>
-      )}
-      {isMobileView && (
-         <button 
-            onClick={handleAddCenterLocation} 
-            className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 bg-blue-600 text-white px-4 py-2 rounded-md shadow-lg text-sm"
-          >
-            Add Pin at Map Center
-          </button>
       )}
     </div>
   );

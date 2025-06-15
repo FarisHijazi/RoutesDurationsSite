@@ -6,17 +6,19 @@ alwaysApply: true
 # Active Context: Google Maps Routing Distance Matrix Calculator
 
 ## Current Work Focus
-The confidence band plot feature is now implemented and working as intended. Each destination has its own plot, bands are rendered correctly between best and worst case, and all plots share a global Y-axis scale. Chart.js dataset order and fill config are critical for correct band rendering.
+The location selection page is now fully implemented, with all planned features and bug fixes completed. The focus was on improving map interactions for both desktop (double-click to add) and mobile (pin drops on map idle), enhancing the location search with proximity bias, and providing clear user location feedback.
 
 ## Recent Changes
-*   Implemented and debugged the confidence band plot for results, ensuring correct band rendering and shared Y-axis.
-*   Updated results tables to show best, average, and worst case travel times.
-*   Documented Chart.js lessons in the devlog.
+*   Completed all location selection page features, including double-click to add pins, an initial pin at the user's location, and proximity-based search sorting.
+*   Improved mobile map interaction by having the pin drop when the map becomes `idle`, replacing the previous `center_changed` logic.
+*   Added a dedicated marker to show the user's current geolocation.
+*   Fixed a bug where mobile map interaction was not working as intended.
 
 ## Next Steps
-1.  Begin implementing user memory (persisting user locations for returning users).
-2.  Continue with the "Find Closest Gym" feature and other planned enhancements.
+1.  Implement minor enhancements on the location page, such as submitting the location name with the Enter key and pre-filling the name from search results.
+2.  Begin work on the "Find Closest Facilities" feature.
+3.  Address the major bug in the results page summary calculation.
 
 ## Active Decisions and Considerations
-*   Chart.js area band rendering requires correct dataset order and fill config.
-*   Focus is now on user memory and gym search features.
+*   The `idle` event is the correct choice for triggering pin placement after map movement on mobile devices.
+*   The next development focus will be on minor location page enhancements before starting the larger "Find Closest Facilities" feature.

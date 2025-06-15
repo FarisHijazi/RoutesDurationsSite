@@ -40,17 +40,22 @@ const LocationStep: React.FC = () => {
       setSearchResults([]);
       return;
     }
+    
+    const propertyLocation = locations.find(loc => loc.isProperty);
+    const request: google.maps.places.TextSearchRequest = { query };
 
-    placesServiceRef.current.textSearch({
-      query: query,
-    }, (results, status) => {
+    if (propertyLocation) {
+      request.location = propertyLocation.position;
+    }
+
+    placesServiceRef.current.textSearch(request, (results, status) => {
       if (status === google.maps.places.PlacesServiceStatus.OK && results) {
         setSearchResults(results);
       } else {
         setSearchResults([]); // Clear results on error or no results
       }
     });
-  }, []);
+  }, [locations]);
 
   // Perform search directly when searchQuery changes
   useEffect(() => {
@@ -201,6 +206,19 @@ const LocationStep: React.FC = () => {
           </div>
           
           <div className="mt-4 bg-gray-50 border border-gray-200 rounded-md p-4">
+              <div>
+                <button
+                  onClick={handleAddLocation}
+                  disabled={!selectedPosition || !locationName.trim()}
+                  className={`w-full sm:w-auto px-4 py-2 rounded-md text-white transition duration-150 ${
+                    (!selectedPosition || !locationName.trim())
+                      ? 'bg-blue-300 cursor-not-allowed'
+                      : 'bg-blue-600 hover:bg-blue-700'
+                  }`}
+                >
+                  {selectedPosition ? 'Add This Location' : 'Click Map or Search to Select'}
+                </button>
+              </div>
             <h3 className="text-sm font-medium text-gray-700 mb-3">
               {selectedPosition ? 'Confirm Location Details:' : 'Select a Location to Add:'}
             </h3>
@@ -233,19 +251,6 @@ const LocationStep: React.FC = () => {
                 </div>
               )}
               
-              <div>
-                <button
-                  onClick={handleAddLocation}
-                  disabled={!selectedPosition || !locationName.trim()}
-                  className={`w-full sm:w-auto px-4 py-2 rounded-md text-white transition duration-150 ${
-                    (!selectedPosition || !locationName.trim())
-                      ? 'bg-blue-300 cursor-not-allowed'
-                      : 'bg-blue-600 hover:bg-blue-700'
-                  }`}
-                >
-                  {selectedPosition ? 'Add This Location' : 'Click Map or Search to Select'}
-                </button>
-              </div>
             </div>
             {selectedPosition && locationName && (
                 <p className="text-xs text-gray-500 mt-2">
