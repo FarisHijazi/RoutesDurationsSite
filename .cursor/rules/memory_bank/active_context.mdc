@@ -6,9 +6,11 @@ alwaysApply: true
 # Active Context: Google Maps Routing Distance Matrix Calculator
 
 ## Current Work Focus
-The app's core features are now robust and functional. The main focus has been on fixing critical API bugs, implementing the "Find Closest Facilities" feature, and adding significant UX enhancements like loading states and a print report feature. The next phase will be addressing minor bugs and deprecation warnings.
+The application's core logic for calculating and displaying travel times is now accurate and includes both outbound and return trips. The main focus has been on resolving data accuracy issues and implementing the return trip feature. The next phase remains addressing minor bugs and deprecation warnings.
 
 ## Recent Changes
+*   **Fixed Calculation Accuracy**: Addressed a major bug where travel time calculations were incorrect. The app no longer uses mock data or arbitrary "multipliers." All calculations for best, worst, and average times are now based on the correct `optimistic`, `pessimistic`, and `best_guess` models from the Google Maps API.
+*   **Implemented Return Trips**: Added a major new feature to calculate and display return trips. The app now fetches data for both directions (e.g., Home to Work and Work to Home) and displays them as separate items in the summary and as distinct confidence bands in the charts.
 *   **Fixed Critical API Bug**: Resolved the `departure_time is in the past` error by ensuring the departure time for Google Maps API calls is always set to a future date. This unblocked the core calculation functionality.
 *   **Fixed Results Summary Calculation**: The summary now correctly calculates average time from `best_guess`, best time from `optimistic`, and worst time from `pessimistic` results, providing a more accurate and intuitive summary.
 *   **Implemented "Find Closest Facilities"**: Users can now define types of facilities (e.g., gyms, minimarkets), and the app will find and add the nearest ones to the map based on the property's location.
@@ -22,5 +24,5 @@ The app's core features are now robust and functional. The main focus has been o
 2.  Investigate and resolve the deprecation warnings from the Google Maps API.
 
 ## Active Decisions and Considerations
+*   The logic for calculating summary statistics (best/worst/average) is now aligned with user expectations and provides a more realistic travel time forecast for both outbound and return trips.
 *   The `departureTime` for the Distance Matrix API must be set to the future. The current logic checks if the selected time has passed for today and sets it for tomorrow if needed. This is the correct and stable solution.
-*   The logic for calculating summary statistics (best/worst/average) is now aligned with user expectations and provides a more realistic travel time forecast.

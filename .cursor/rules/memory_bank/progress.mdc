@@ -43,8 +43,8 @@ alwaysApply: true
     - facilities are defined as: 🏋️ gyms, 🧺 laundry mats, 🏪 minimarkets )بقالة(, and ⛽ fuel stations.
     - [ ] In the location selection page, add a section at the bottom of the page that allows the user to add facilities. The above facilities should always be added as the default values, and the user can add or remove those textfields, once the user is done, they can press next. These can be checked and unchecked on the maps destinations selection page, the user can then add a button "Add facilities". As the user adds locations, they get added to the map
 - **Results page**
-    - [ ] the time calculation is off, I don't ever remember asking for "mode multipliers" or any multiplier. 
-    - [ ] we have to verify that the best, worst, and average times are correct, we need to revise the accuracy of the results.
+    - [x] the time calculation is off, I don't ever remember asking for "mode multipliers" or any multiplier. 
+    - [x] we have to verify that the best, worst, and average times are correct, we need to revise the accuracy of the results.
     - [x] parallel API calls: the results page takes a very long time to show results, please parallelize ALL the API calls aggressively to minimize the time it takes, currently it takes about 1minute, it should be around 3 seconds.
     - [x] MAJOR BUG: the MOCK_MODE is not identical to the actual API, the entire website is built on the MOCK, so please change the actual non-MOCK functions so that they look like the MOCK functions
     - [x] MAJOR BUG: the results page travel summary does not show the actual Best and worst and average time, rather, it uses 6 AM and 8 AM. Please actually use all the times to get proper statistics.
@@ -54,6 +54,8 @@ alwaysApply: true
     - [x] add the ability to print the results page as a report
     - [x] in the results page plot, have Google maps color codes: red for durations above 30 minutes, yellow for durations between 10 minutes and 30 minutes, and blue for durations below 10 minutes.
     - [x] add a timer that tells the user how long the search took
+- **Results page**
+    - [x] Add return trips: The app should calculate, display, and plot return trips (e.g., "Work -> Home") in addition to outbound trips, showing them as separate entries in summaries and distinct bands on charts.
 
 ## Potential Minor Enhancements & Polish:
 - [ ] in the "Time periods" page, make them vertical, not a grid view.

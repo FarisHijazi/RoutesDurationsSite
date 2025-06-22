@@ -19,12 +19,12 @@ The application follows a component-based architecture, typical of React applica
     *   `ResultsMap.tsx`: Visualizes routes and traffic information on the results page.
     *   `mapStyles.css`: Styles specific to map components.
 *   **Results Presentation (located in `src/components/results/`)**:
-    *   `ResultsSummary.tsx`: Offers a high-level overview of findings, sorted by average travel time.
-    *   `ResultsDetails.tsx`: Presents a detailed breakdown of times and distances.
-    *   `ResultsCharts.tsx`: Uses Chart.js to display travel data graphically. **Confidence band plots require correct dataset order and fill config for area band rendering and are now dynamically color-coded based on average travel duration.**
+    *   `ResultsSummary.tsx`: Offers a high-level overview of findings, sorted by average travel time. **Now processes and displays outbound and return trips as separate items.**
+    *   `ResultsDetails.tsx`: Presents a detailed breakdown of times and distances. **Its structure naturally handles displaying return trips as new rows.**
+    *   `ResultsCharts.tsx`: Uses Chart.js to display travel data graphically. **Now renders separate, distinct confidence bands for both outbound and return trips.**
     *   **All `Results...` components now display a `LoadingIndicator` while `isCalculating` is true.**
 *   **State Management**: Centralized state is managed by Zustand, with the main store defined in `src/store/index.ts`. **The `isCalculating` state is critical for showing loading UI.**
-*   **API Service Layer**: `src/services/mapService.ts` encapsulates all interactions with the Google Maps API. **It's critical that the `departureTime` sent to the Distance Matrix API is always in the future to get traffic data.**
+*   **API Service Layer**: `src/services/mapService.ts` encapsulates all interactions with the Google Maps API. **It now fetches data for both outbound and return trips. It's also critical that the `departureTime` sent to the Distance Matrix API is always in the future to get traffic data.**
 *   **Core Application Entry**: `src/App.tsx` sets up the main application structure and initializes the React application via `src/main.tsx`. It is also responsible for loading the Google Maps API script with all necessary libraries (`places`, `geocoding`, `routes`) using the `@googlemaps/react-wrapper` to ensure it's loaded once for the entire application.
 *   **Google Maps API Loading**: The Google Maps JavaScript API (including libraries for Places, Geocoding, and Routes) is loaded centrally in `App.tsx` using the `@googlemaps/react-wrapper`. This avoids conflicts that arise from multiple loader instances with different configurations.
 *   **Reusable Components (located in `src/components/common/`)**:
@@ -49,7 +49,7 @@ The application follows a component-based architecture, typical of React applica
 *   `WizardContainer.tsx` renders the active step component (e.g., `LocationStep`, `TimeSelectionStep`, `ResultsStep`) and uses `WizardNavigation.tsx`.
 *   `App.tsx` wraps `WizardContainer` with the Google Maps `Wrapper` to provide a global API context.
 *   `LocationStep.tsx` uses `MapComponent.tsx` and initializes Google services, assuming libraries are loaded by the global `Wrapper`.
-*   `ResultsStep.tsx` uses `ResultsMap.tsx` and aggregates data using `ResultsSummary.tsx`, `ResultsDetails.tsx`, and `ResultsCharts.tsx`, assuming libraries are loaded by the global `Wrapper`.
+*   `ResultsStep.tsx` uses `ResultsMap.tsx` and aggregates data using `ResultsSummary.tsx`, `ResultsDetails.tsx`, and `ResultsCharts.tsx`, assuming libraries are loaded by the global `Wrapper`. **These components now handle both outbound and return trip data.**
 *   The results components (`ResultsSummary`, `ResultsCharts`, `ResultsDetails`) all show a `LoadingIndicator` based on the `isCalculating` state from the Zustand store.
 *   All components needing shared data interact with the Zustand store (`src/store/index.ts`).
 *   Components triggering map operations or data fetching call functions within `src/services/mapService.ts`.
