@@ -15,6 +15,7 @@ import {
   ChartOptions
 } from 'chart.js';
 import LoadingIndicator from '../common/LoadingIndicator';
+import { RouteResult, TimeOption } from '../../store';
 
 ChartJS.register(
   CategoryScale,
@@ -45,6 +46,29 @@ interface ConfidenceBandData {
   avg: number[]; // best_guess
 }
 
+const processTrip = (
+  fromId: string,
+  toId: string,
+  routeResults: RouteResult[],
+  timeOptions: TimeOption[]
+) => {
+  const min: number[] = [];
+  const max: number[] = [];
+  const avg: number[] = [];
+  let hasData = false;
+  timeOptions.forEach(time => {
+    const optimistic = routeResults.find(r => r.fromId === fromId && r.toId === toId && r.timeOption === time.value && r.trafficModel === 'optimistic');
+    const pessimistic = routeResults.find(r => r.fromId === fromId && r.toId === toId && r.timeOption === time.value && r.trafficModel === 'pessimistic');
+    const bestGuess = routeResults.find(r => r.fromId === fromId && r.toId === toId && r.timeOption === time.value && r.trafficModel === 'best_guess');
+    
+    min.push(optimistic ? optimistic.durationValue / 60 : 0);
+    max.push(pessimistic ? pessimistic.durationValue / 60 : 0);
+    avg.push(bestGuess ? bestGuess.durationValue / 60 : 0);
+    if(optimistic || pessimistic || bestGuess) hasData = true;
+  });
+  return hasData ? { min, max, avg } : null;
+};
+
 const ResultsCharts: React.FC = () => {
   const { locations, routeResults, timeOptions, isCalculating } = useStore();
   const [visible, setVisible] = useState<{ [id: string]: boolean }>({});
@@ -66,42 +90,31 @@ const ResultsCharts: React.FC = () => {
     const property = locations.find(loc => loc.isProperty);
     const destinations = locations.filter(loc => !loc.isProperty);
     if (!property || destinations.length === 0) return [];
-    return destinations.map(dest => {
-      const min: number[] = [];
-      const max: number[] = [];
-      const avg: number[] = [];
-      timeOptions.forEach(time => {
-        // Find the three models for this property->destination at this time
-        const optimistic = routeResults.find(r =>
-          r.fromId === property.id &&
-          r.toId === dest.id &&
-          r.timeOption === time.value &&
-          r.trafficModel === 'optimistic'
-        );
-        const pessimistic = routeResults.find(r =>
-          r.fromId === property.id &&
-          r.toId === dest.id &&
-          r.timeOption === time.value &&
-          r.trafficModel === 'pessimistic'
-        );
-        const bestGuess = routeResults.find(r =>
-          r.fromId === property.id &&
-          r.toId === dest.id &&
-          r.timeOption === time.value &&
-          r.trafficModel === 'best_guess'
-        );
-        min.push(optimistic ? optimistic.durationValue / 60 : 0);
-        max.push(pessimistic ? pessimistic.durationValue / 60 : 0);
-        avg.push(bestGuess ? bestGuess.durationValue / 60 : 0);
-      });
-      return {
-        destinationId: dest.id,
-        destinationName: dest.name,
-        min,
-        max,
-        avg,
-      };
+    
+    const bands: ConfidenceBandData[] = [];
+
+    destinations.forEach(dest => {
+      // Outbound trip
+      const outbound = processTrip(property.id, dest.id, routeResults, timeOptions);
+      if (outbound) {
+        bands.push({
+          destinationId: dest.id,
+          destinationName: dest.name,
+          ...outbound,
+        });
+      }
+
+      // Return trip
+      const inbound = processTrip(dest.id, property.id, routeResults, timeOptions);
+      if (inbound) {
+        bands.push({
+          destinationId: `${dest.id}-return`,
+          destinationName: `${dest.name} (Return)`,
+          ...inbound,
+        });
+      }
     });
+    return bands;
   }, [locations, routeResults, timeOptions]);
 
   // Assign persistent colors to each destination
@@ -290,8 +303,7 @@ const ResultsCharts: React.FC = () => {
               checked={visible[band.destinationId] ?? true}
               onChange={e => setVisible(v => ({ ...v, [band.destinationId]: e.target.checked }))}
             />
-            <span style={{ color: colorMap[band.destinationId] || COLORS[0] }}>{band.destinationName}</span>
-            {/* <span style={{ color: colorMap[band.destinationId] || getDurationColor(0) }}>{band.destinationName}</span> */}
+            <span style={{ color: colorMap[band.destinationId] || getDurationColor(0) }}>{band.destinationName}</span>
           </label>
         ))}
       </div>

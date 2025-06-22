@@ -27,6 +27,16 @@ export const calculateRoutes = async (
               trafficModel
             )
           );
+
+          // Calculate route from destination to property
+          promises.push(
+            calculateRoute(
+              destination,
+              property,
+              timeOption,
+              trafficModel
+            )
+          );
         }
       }
     }

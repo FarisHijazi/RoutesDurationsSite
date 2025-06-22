@@ -28,10 +28,31 @@ const ResultsSummary: React.FC = () => {
   if (!property) {
     return <div>No property location found.</div>;
   }
+
+  // Helper to calculate stats
+  const processResults = (results: typeof routeResults) => {
+    const bestGuessResults = results.filter(r => r.trafficModel === 'best_guess');
+    const optimisticResults = results.filter(r => r.trafficModel === 'optimistic');
+    const pessimisticResults = results.filter(r => r.trafficModel === 'pessimistic');
+
+    const totalDuration = bestGuessResults.reduce((sum, r) => sum + r.durationValue, 0);
+    const avgDuration = totalDuration / bestGuessResults.length;
+
+    const bestResult = optimisticResults.sort((a, b) => a.durationValue - b.durationValue)[0];
+    const worstResult = pessimisticResults.sort((a, b) => a.durationValue - b.durationValue)[pessimisticResults.length - 1];
+
+    return {
+      avgDuration,
+      bestTime: bestResult.timeOption,
+      worstTime: worstResult.timeOption,
+      bestDuration: bestResult.durationValue,
+      worstDuration: worstResult.durationValue
+    };
+  };
   
-  // Group results by destination
+  // Group results by destination and direction
   const destinationGroups: { [key: string]: {
-    destination: Location,
+    name: string,
     avgDuration: number,
     bestTime: string,
     worstTime: string,
@@ -40,40 +61,25 @@ const ResultsSummary: React.FC = () => {
   }} = {};
   
   locations.filter(loc => !loc.isProperty).forEach(destination => {
-    // Get all results for this property-destination pair
-    const resultsToDestination = routeResults.filter(
+    // Process outbound trips (property -> destination)
+    const resultsTo = routeResults.filter(
       r => r.fromId === property.id && r.toId === destination.id
     );
+    if (resultsTo.length > 0) {
+      const { avgDuration, bestTime, worstTime, bestDuration, worstDuration } = processResults(resultsTo);
+      destinationGroups[destination.id] = { name: destination.name, avgDuration, bestTime, worstTime, bestDuration, worstDuration };
+    }
     
-    if (resultsToDestination.length > 0) {
-      // Filter by traffic model
-      const bestGuessResults = resultsToDestination.filter(r => r.trafficModel === 'best_guess');
-      const optimisticResults = resultsToDestination.filter(r => r.trafficModel === 'optimistic');
-      const pessimisticResults = resultsToDestination.filter(r => r.trafficModel === 'pessimistic');
-
-      if (bestGuessResults.length > 0 && optimisticResults.length > 0 && pessimisticResults.length > 0) {
-        // Calculate average duration from 'best_guess'
-        const totalDuration = bestGuessResults.reduce(
-          (sum, r) => sum + r.durationValue, 0
-        );
-        const avgDuration = totalDuration / bestGuessResults.length;
-
-        // Find best and worst times from 'optimistic' and 'pessimistic'
-        const bestResult = optimisticResults.sort((a, b) => a.durationValue - b.durationValue)[0];
-        const worstResult = pessimisticResults.sort((a, b) => a.durationValue - b.durationValue)[pessimisticResults.length - 1];
-
-        destinationGroups[destination.id] = {
-          destination,
-          avgDuration,
-          bestTime: bestResult.timeOption,
-          worstTime: worstResult.timeOption,
-          bestDuration: bestResult.durationValue,
-          worstDuration: worstResult.durationValue
-        };
-      }
+    // Process return trips (destination -> property)
+    const resultsFrom = routeResults.filter(
+      r => r.fromId === destination.id && r.toId === property.id
+    );
+    if (resultsFrom.length > 0) {
+      const { avgDuration, bestTime, worstTime, bestDuration, worstDuration } = processResults(resultsFrom);
+      destinationGroups[`${destination.id}-return`] = { name: `${destination.name} (Return)`, avgDuration, bestTime, worstTime, bestDuration, worstDuration };
     }
   });
-  
+
   // Format time in minutes
   const formatTime = (seconds: number) => {
     const minutes = Math.round(seconds / 60);
@@ -112,12 +118,12 @@ const ResultsSummary: React.FC = () => {
         </div>
       ) : (
         <div className="space-y-4">
-          {sortedDestinationGroups.map(({ destination, avgDuration, bestTime, worstTime, bestDuration, worstDuration }) => (
-            <div key={destination.id} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+          {sortedDestinationGroups.map(({ name, avgDuration, bestTime, worstTime, bestDuration, worstDuration }, index) => (
+            <div key={index} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
               <div className="flex items-start">
                 <MapPinIcon className="h-5 w-5 text-red-500 mr-2 mt-0.5" />
                 <div>
-                  <h4 className="font-medium text-gray-800">{destination.name}</h4>
+                  <h4 className="font-medium text-gray-800">{name}</h4>
                   
                   <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
                     <div className="flex items-center">
