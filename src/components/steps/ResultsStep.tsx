@@ -5,7 +5,7 @@ import { calculateRoutes } from '../../services/mapService';
 import ResultsSummary from '../results/ResultsSummary';
 import ResultsDetails from '../results/ResultsDetails';
 import ResultsCharts from '../results/ResultsCharts';
-import { Loader2Icon } from 'lucide-react';
+import { Loader2Icon, PrinterIcon } from 'lucide-react';
 
 const ResultsStep: React.FC = () => {
   const { 
@@ -62,7 +62,18 @@ const ResultsStep: React.FC = () => {
   }, [locations, timeOptions, routeResults, isCalculating, runCalculations]);
 
   return (
-    <div className="flex flex-col gap-8 w-full">
+    <div className="results-container flex flex-col gap-8 w-full">
+      <div className="no-print flex justify-between items-center">
+        <h2 className="text-3xl font-bold text-gray-800">Analysis Report</h2>
+        <button
+          onClick={() => window.print()}
+          className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium shadow-sm transition-colors"
+        >
+          <PrinterIcon className="h-4 w-4 mr-2" />
+          Print Report
+        </button>
+      </div>
+
       <div className="bg-gray-100 rounded-lg overflow-hidden h-[400px] w-full">
         <ResultsMap 
           locations={locations}
@@ -74,7 +85,7 @@ const ResultsStep: React.FC = () => {
       <ResultsCharts />
       <div className="mt-4">
         <button
-          className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 text-gray-800 font-medium mb-2"
+          className="no-print px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 text-gray-800 font-medium mb-2"
           onClick={() => setShowDetails(v => !v)}
         >
           {showDetails ? 'Hide' : 'Show'} Trip detailed times

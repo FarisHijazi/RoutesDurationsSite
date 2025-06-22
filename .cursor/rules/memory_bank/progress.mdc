@@ -18,13 +18,13 @@ alwaysApply: true
     - `ResultsStep.tsx`: Displays results (map, summary, details, charts) in a **vertical, full-width, scrollable layout**. Table cropping/overflow is fixed. Map no longer zooms in when adding the first location.
 - **Google Maps API Integration**: `mapService.ts` correctly fetches Distance Matrix data. Error handling for API calls in `ResultsStep.tsx` is improved.
 - **Google Maps API Loader**: The Google Maps API (`@googlemaps/react-wrapper`) is now loaded centrally in `App.tsx` with all required libraries (`places`, `geocoding`, `routes`), resolving the "Loader must not be called again with different options" error. Components (`LocationStep`, `ResultsStep`) no longer manage their own API loader instances.
-- **State Management**: `store/index.ts` effectively manages application state (API key, wizard step, locations, times, results).
+- **State Management**: `store/index.ts` effectively manages application state, including a dedicated `isCalculating` flag that is now used to show loading indicators across the UI for a better user experience.
 - **Results Display Enhancements**:
     - `ResultsSummary.tsx` now sorts destinations by average travel time.
     - `ResultsStep.tsx` uses a continuous, back-to-back display for results components.
     - Results tables are now horizontally scrollable and fully visible.
     - Map does not zoom in when adding the first location.
-- **Confidence Band Plot**: The results page now displays a confidence band plot for each destination, with the band correctly rendered between best and worst case lines, and all plots sharing a global Y-axis scale. Chart.js dataset order and fill config are critical for correct band rendering.
+- **Confidence Band Plot**: The results page displays a confidence band plot for each destination. The plots now use dynamic, Google Maps-style color-coding (red/yellow/blue) based on the overall average travel time for that destination.
 
 
 ## Major features:
@@ -35,19 +35,19 @@ alwaysApply: true
     - [x] remove "Add Pin at Map Center" button for mobile mode and instead make the pin get dropped at the center whenever the map moves, make sure to have a logo/icon at the center of the map.
     - [x] add an icon/marker for where the user's current location is, don't add a location, just to let the user know where they are.
     - [x] The textfield for searching and adding new locations should sort search results for places closest to the user's property location (which is the first location added).
-    - [ ] I want the "confirm location details:" textfield to click the "Add This Location" button, when ENTER is pressed.
-    - [ ] when text searching for a location and adding it, you already have the place name in the search results, so you can use that info to put it in the "Enter destination name" textfield, rather than an ugly address.
+    - [x] I want the "confirm location details:" textfield to click the "Add This Location" button, when ENTER is pressed.
+    - [x] when text searching for a location and adding it, you already have the place name in the search results, so you can use that info to put it in the "Enter destination name" textfield, rather than an ugly address.
 - [ ] **New major feature: Find Closest facilities**:
     - facilities are defined as: 🏋️ gyms, 🧺 laundry mats, 🏪 minimarkets )بقالة(, and ⛽ fuel stations.
     - [ ] In the location selection page, add a section at the bottom of the page that allows the user to add facilities. The above facilities should always be added as the default values, and the user can add or remove those textfields, once the user is done, they can press next. These can be checked and unchecked on the maps destinations selection page, the user can then add a button "Add facilities". As the user adds locations, they get added to the map
 - **Results page**
-    - [ ] MAJOR BUG: the MOCK_MODE is not identical to the actual API, the entire website is built on the MOCK, so please change the actual non-MOCK functions so that they look like the MOCK functions
-    - [ ] MAJOR BUG: the results page travel summary does not show the actual Best and worst and average time, rather, it uses 6 AM and 8 AM. Please actually use all the times to get proper statistics.
+    - [x] MAJOR BUG: the MOCK_MODE is not identical to the actual API, the entire website is built on the MOCK, so please change the actual non-MOCK functions so that they look like the MOCK functions
+    - [x] MAJOR BUG: the results page travel summary does not show the actual Best and worst and average time, rather, it uses 6 AM and 8 AM. Please actually use all the times to get proper statistics.
     - [x] Fix the results page time plots in the "Trip Details" section, the time dropdown doesn't actually change the plots
     - [x] In the results page, remove the bar plots and instead use a confidence band plot. The X axis is the time across the day (6am-10pm etc), and the Y axis is the average travel time. The confidence band is the worst case and best case scenario.
     - [x] When building the confidence band plot, use a common X-axis for all the locations and repeat the Y-axis multiple times for each location, but make sure they are all the same scale.
-    - [ ] add the ability to print the results page as a report
-    - [ ] in the results page plot, have Google maps color codes: red for durations above 30 minutes, yellow for durations between 10 minutes and 30 minutes, and blue for durations below 10 minutes.
+    - [x] add the ability to print the results page as a report
+    - [x] in the results page plot, have Google maps color codes: red for durations above 30 minutes, yellow for durations between 10 minutes and 30 minutes, and blue for durations below 10 minutes.
 
 ## Potential Minor Enhancements & Polish:
 - [x] in the results, page the checkboxes that enable and disable the confidence band plots are actually changing the colors of the plots, it seems that the plots colors are based on the index of the plot, the first plot is always blue, and the second is green, and the third is yellow. I think the best solution is to explicitly generate random colors and that way they'll be explicitly assigned to each plot.

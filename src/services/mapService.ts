@@ -1,7 +1,7 @@
 import { Location, RouteResult } from '../store';
 
 // Mock distance matrix data for development without API key
-const MOCK_MODE = true;
+const MOCK_MODE = false;
 
 // Function to calculate routes between locations
 export const calculateRoutes = async (
@@ -59,8 +59,15 @@ const calculateRoute = async (
 ): Promise<RouteResult> => {
   // Parse time option to create a departure time
   const [hours, minutes] = timeOption.split(':').map(Number);
+  
+  const now = new Date();
   const departureTime = new Date();
   departureTime.setHours(hours, minutes, 0, 0);
+
+  // If the calculated departure time is in the past for today, set it for tomorrow
+  if (departureTime < now) {
+    departureTime.setDate(departureTime.getDate() + 1);
+  }
 
   // Use Distance Matrix API
   const service = new google.maps.DistanceMatrixService();

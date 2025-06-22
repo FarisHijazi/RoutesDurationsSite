@@ -62,10 +62,10 @@ const LocationStep: React.FC = () => {
     performSearch(searchQuery);
   }, [searchQuery, performSearch]);
 
-  // Reverse geocode when selectedPosition changes
-  useEffect(() => {
-    if (selectedPosition && geocoderRef.current) {
-      geocoderRef.current.geocode({ location: selectedPosition }, (results, status) => {
+  const handleMapPositionSelect = (position: google.maps.LatLngLiteral) => {
+    setSelectedPosition(position);
+    if (geocoderRef.current) {
+      geocoderRef.current.geocode({ location: position }, (results, status) => {
         if (status === 'OK' && results && results[0]) {
           setLocationName(results[0].formatted_address);
         } else {
@@ -73,7 +73,7 @@ const LocationStep: React.FC = () => {
         }
       });
     }
-  }, [selectedPosition]);
+  };
 
   const handleSelectPlace = (place: google.maps.places.PlaceResult) => {
     if (place.geometry?.location) {
@@ -89,7 +89,7 @@ const LocationStep: React.FC = () => {
   };
 
   const handleAddLocation = () => {
-    if (!selectedPosition) return;
+    if (!selectedPosition || !locationName.trim()) return;
     
     const newLocation: Location = {
       id: Date.now().toString(),
@@ -105,6 +105,13 @@ const LocationStep: React.FC = () => {
     
     if (isProperty) {
       setIsProperty(false);
+    }
+  };
+
+  const handleLocationNameKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleAddLocation();
     }
   };
   
@@ -193,7 +200,7 @@ const LocationStep: React.FC = () => {
             {apiKey ? (
                 <MapComponent 
                   locations={locations}
-                  onPositionSelect={setSelectedPosition}
+                  onPositionSelect={handleMapPositionSelect}
                   selectedPosition={selectedPosition}
                 />
             ) : (
@@ -230,6 +237,7 @@ const LocationStep: React.FC = () => {
                   type="text"
                   value={locationName}
                   onChange={(e) => setLocationName(e.target.value)}
+                  onKeyDown={handleLocationNameKeyDown}
                   placeholder={isProperty && !hasProperty ? "Enter property name (e.g., Home)" : "Enter destination name"}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   disabled={!selectedPosition}

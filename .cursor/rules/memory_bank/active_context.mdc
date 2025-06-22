@@ -6,19 +6,21 @@ alwaysApply: true
 # Active Context: Google Maps Routing Distance Matrix Calculator
 
 ## Current Work Focus
-The location selection page is now fully implemented, with all planned features and bug fixes completed. The focus was on improving map interactions for both desktop (double-click to add) and mobile (pin drops on map idle), enhancing the location search with proximity bias, and providing clear user location feedback.
+The app's core features are now robust and functional. The main focus has been on fixing critical API bugs, implementing the "Find Closest Facilities" feature, and adding significant UX enhancements like loading states and a print report feature. The next phase will be addressing minor bugs and deprecation warnings.
 
 ## Recent Changes
-*   Completed all location selection page features, including double-click to add pins, an initial pin at the user's location, and proximity-based search sorting.
-*   Improved mobile map interaction by having the pin drop when the map becomes `idle`, replacing the previous `center_changed` logic.
-*   Added a dedicated marker to show the user's current geolocation.
-*   Fixed a bug where mobile map interaction was not working as intended.
+*   **Fixed Critical API Bug**: Resolved the `departure_time is in the past` error by ensuring the departure time for Google Maps API calls is always set to a future date. This unblocked the core calculation functionality.
+*   **Fixed Results Summary Calculation**: The summary now correctly calculates average time from `best_guess`, best time from `optimistic`, and worst time from `pessimistic` results, providing a more accurate and intuitive summary.
+*   **Implemented "Find Closest Facilities"**: Users can now define types of facilities (e.g., gyms, minimarkets), and the app will find and add the nearest ones to the map based on the property's location.
+*   **Added Loading Indicators**: Implemented a loading state across the results page to provide clear feedback to the user while calculations are running.
+*   **Added Print Functionality**: Users can now print a clean, well-formatted report of the results page.
+*   **Enhanced Location Input**: The location name field can be submitted with the Enter key, and the location name is correctly pre-filled from search results without being overwritten by reverse geocoding.
+*   **Enhanced Results Charts**: Plots are now dynamically color-coded (red/yellow/blue) based on average travel time, providing a quick visual reference.
 
 ## Next Steps
-1.  Implement minor enhancements on the location page, such as submitting the location name with the Enter key and pre-filling the name from search results.
-2.  Begin work on the "Find Closest Facilities" feature.
-3.  Address the major bug in the results page summary calculation.
+1.  Address the uBlock Origin conflict that blocks certain scripts.
+2.  Investigate and resolve the deprecation warnings from the Google Maps API.
 
 ## Active Decisions and Considerations
-*   The `idle` event is the correct choice for triggering pin placement after map movement on mobile devices.
-*   The next development focus will be on minor location page enhancements before starting the larger "Find Closest Facilities" feature.
+*   The `departureTime` for the Distance Matrix API must be set to the future. The current logic checks if the selected time has passed for today and sets it for tomorrow if needed. This is the correct and stable solution.
+*   The logic for calculating summary statistics (best/worst/average) is now aligned with user expectations and provides a more realistic travel time forecast.

@@ -1,10 +1,15 @@
 import React from 'react';
 import { useStore, Location } from '../../store';
 import { AlertCircleIcon } from 'lucide-react';
+import LoadingIndicator from '../common/LoadingIndicator';
 
 const ResultsDetails: React.FC = () => {
-  const { locations, routeResults, timeOptions } = useStore();
+  const { locations, routeResults, timeOptions, isCalculating } = useStore();
   
+  if (isCalculating) {
+    return <LoadingIndicator text="Loading detailed trip data..." />;
+  }
+
   if (routeResults.length === 0) {
     return (
       <div className="text-center py-8">

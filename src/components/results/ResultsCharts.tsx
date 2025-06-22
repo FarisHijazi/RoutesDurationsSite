@@ -14,6 +14,7 @@ import {
   Filler,
   ChartOptions
 } from 'chart.js';
+import LoadingIndicator from '../common/LoadingIndicator';
 
 ChartJS.register(
   CategoryScale,
@@ -26,6 +27,16 @@ ChartJS.register(
   Filler
 );
 
+const getDurationColor = (duration: number): string => {
+  if (duration > 30) {
+    return 'rgba(239, 68, 68, 1)'; // red
+  }
+  if (duration >= 10) {
+    return 'rgba(234, 179, 8, 1)'; // yellow
+  }
+  return 'rgba(59, 130, 246, 1)'; // blue
+};
+
 interface ConfidenceBandData {
   destinationId: string;
   destinationName: string;
@@ -34,26 +45,18 @@ interface ConfidenceBandData {
   avg: number[]; // best_guess
 }
 
-const COLORS = [
-  'rgba(59, 130, 246, 1)', // blue
-  'rgba(16, 185, 129, 1)', // green
-  'rgba(234, 179, 8, 1)',  // yellow
-  'rgba(239, 68, 68, 1)',  // red
-  'rgba(168, 85, 247, 1)', // purple
-  'rgba(251, 191, 36, 1)', // amber
-  'rgba(52, 211, 153, 1)', // teal
-];
-
 const ResultsCharts: React.FC = () => {
-  const { locations, routeResults, timeOptions } = useStore();
+  const { locations, routeResults, timeOptions, isCalculating } = useStore();
   const [visible, setVisible] = useState<{ [id: string]: boolean }>({});
   const [hovered, setHovered] = useState<string | null>(null);
 
   // Assign a unique, persistent color to each destination based on its ID
   function getColorMap(bands: ConfidenceBandData[]): Record<string, string> {
     const colorMap: Record<string, string> = {};
-    bands.forEach((band, idx) => {
-      colorMap[band.destinationId] = COLORS[idx % COLORS.length];
+    bands.forEach(band => {
+      const sum = band.avg.reduce((a, b) => a + b, 0);
+      const overallAvg = sum / (band.avg.length || 1);
+      colorMap[band.destinationId] = getDurationColor(overallAvg);
     });
     return colorMap;
   }
@@ -138,7 +141,7 @@ const ResultsCharts: React.FC = () => {
   // Build datasets and keep track of Best Case indices
   const datasets: any[] = [];
   visibleBands.forEach((band) => {
-    const color = colorMap[band.destinationId] || COLORS[0];
+    const color = colorMap[band.destinationId] || getDurationColor(0);
     const baseAlpha = hovered && hovered !== band.destinationId ? '0.10' : '0.25';
     const strongAlpha = hovered === band.destinationId ? '0.5' : baseAlpha;
     // Index of Best Case dataset (will be datasets.length before push)
@@ -252,6 +255,10 @@ const ResultsCharts: React.FC = () => {
   };
 
   // Early returns after all hooks
+  if (isCalculating) {
+    return <LoadingIndicator text="Generating travel charts..." />;
+  }
+
   if (routeResults.length === 0) {
     return (
       <div className="text-center py-8">
@@ -284,6 +291,7 @@ const ResultsCharts: React.FC = () => {
               onChange={e => setVisible(v => ({ ...v, [band.destinationId]: e.target.checked }))}
             />
             <span style={{ color: colorMap[band.destinationId] || COLORS[0] }}>{band.destinationName}</span>
+            {/* <span style={{ color: colorMap[band.destinationId] || getDurationColor(0) }}>{band.destinationName}</span> */}
           </label>
         ))}
       </div>

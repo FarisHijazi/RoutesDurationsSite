@@ -1,0 +1,42 @@
+@media print {
+  body {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Hide elements that should not be printed */
+  .no-print {
+    display: none !important;
+  }
+  
+  /* Reset page styles for printing */
+  body, .printable-area {
+    margin: 0 !important;
+    padding: 0 !important;
+    background-color: #fff !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+  
+  /* Main container for results page */
+  .results-container {
+    width: 100% !important;
+    padding: 1cm !important;
+    box-sizing: border-box;
+  }
+  
+  /* Ensure charts and maps take up reasonable space */
+  .results-container .bg-gray-100 {
+    page-break-after: always; /* Put map on its own page */
+  }
+
+  canvas {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+
+  @page {
+    size: A4;
+    margin: 0;
+  }
+} 

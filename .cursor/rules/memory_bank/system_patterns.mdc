@@ -11,9 +11,9 @@ The application follows a component-based architecture, typical of React applica
 ### Key Architectural Components:
 *   **Wizard Flow Management**: `src/components/WizardContainer.tsx` orchestrates the step-by-step user journey. Includes `src/components/WizardNavigation.tsx` for step transitions. (Note: `SetupStep.tsx` has been removed, API key is hardcoded).
 *   **Step Components (located in `src/components/steps/`)**:
-    *   `LocationStep.tsx`: Handles user input for property and destination locations. It uses `MapComponent` for map interactions and provides location search functionality via Google Places API, with results biased towards the primary property's location. Initializes Google services like Geocoder and PlacesService.
+    *   `LocationStep.tsx`: Handles user input for property and destination locations. It uses `MapComponent` for map interactions and provides location search functionality via Google Places API, with results biased towards the primary property's location. Initializes Google services like Geocoder and PlacesService. **Also includes logic for the "Find Closest Facilities" feature, which uses the Places API `nearbySearch` method.**
     *   `TimeSelectionStep.tsx`: Allows users to select multiple time slots.
-    *   `ResultsStep.tsx`: Displays the calculated results, including a map.
+    *   `ResultsStep.tsx`: Displays the calculated results, including a map. **Contains a "Print Report" button that uses `window.print()` and relies on print-specific CSS for formatting.**
 *   **Map Interaction (located in `src/components/map/`)**:
     *   `MapComponent.tsx`: Provides the primary map interface for location selection. Handles `dblclick` events for pin placement on desktop and uses the `idle` map event on mobile to select the location at the map's center. It also displays a marker for the user's current geolocation.
     *   `ResultsMap.tsx`: Visualizes routes and traffic information on the results page.
@@ -21,11 +21,14 @@ The application follows a component-based architecture, typical of React applica
 *   **Results Presentation (located in `src/components/results/`)**:
     *   `ResultsSummary.tsx`: Offers a high-level overview of findings, sorted by average travel time.
     *   `ResultsDetails.tsx`: Presents a detailed breakdown of times and distances.
-    *   `ResultsCharts.tsx`: Uses Chart.js to display travel data graphically. **Confidence band plots require correct dataset order and fill config for area band rendering.**
-*   **State Management**: Centralized state is managed by Zustand, with the main store defined in `src/store/index.ts`.
-*   **API Service Layer**: `src/services/mapService.ts` encapsulates all interactions with the Google Maps API (Distance Matrix, and will include Places API for gym search), abstracting the API calls from the UI components.
+    *   `ResultsCharts.tsx`: Uses Chart.js to display travel data graphically. **Confidence band plots require correct dataset order and fill config for area band rendering and are now dynamically color-coded based on average travel duration.**
+    *   **All `Results...` components now display a `LoadingIndicator` while `isCalculating` is true.**
+*   **State Management**: Centralized state is managed by Zustand, with the main store defined in `src/store/index.ts`. **The `isCalculating` state is critical for showing loading UI.**
+*   **API Service Layer**: `src/services/mapService.ts` encapsulates all interactions with the Google Maps API. **It's critical that the `departureTime` sent to the Distance Matrix API is always in the future to get traffic data.**
 *   **Core Application Entry**: `src/App.tsx` sets up the main application structure and initializes the React application via `src/main.tsx`. It is also responsible for loading the Google Maps API script with all necessary libraries (`places`, `geocoding`, `routes`) using the `@googlemaps/react-wrapper` to ensure it's loaded once for the entire application.
 *   **Google Maps API Loading**: The Google Maps JavaScript API (including libraries for Places, Geocoding, and Routes) is loaded centrally in `App.tsx` using the `@googlemaps/react-wrapper`. This avoids conflicts that arise from multiple loader instances with different configurations.
+*   **Reusable Components (located in `src/components/common/`)**:
+    *   `LoadingIndicator.tsx`: A reusable component displayed while background operations are in progress.
 
 ## Key Technical Decisions
 *   **React with TypeScript**: Chosen for robust, type-safe frontend development and a rich ecosystem.
@@ -40,12 +43,14 @@ The application follows a component-based architecture, typical of React applica
 *   **Container/Presentational Pattern**: Generally observed, with step components managing logic and sub-components focusing on UI.
 *   **Service Layer**: The `mapService.ts` acts as a service layer.
 *   **Wizard Pattern**: The UI flow follows a sequential, multi-step process.
+*   **Print Styling**: A dedicated `src/print.css` file combined with `.no-print` utility classes allows for creating clean, printer-friendly reports from existing app views.
 
 ## Component Relationships
 *   `WizardContainer.tsx` renders the active step component (e.g., `LocationStep`, `TimeSelectionStep`, `ResultsStep`) and uses `WizardNavigation.tsx`.
 *   `App.tsx` wraps `WizardContainer` with the Google Maps `Wrapper` to provide a global API context.
 *   `LocationStep.tsx` uses `MapComponent.tsx` and initializes Google services, assuming libraries are loaded by the global `Wrapper`.
 *   `ResultsStep.tsx` uses `ResultsMap.tsx` and aggregates data using `ResultsSummary.tsx`, `ResultsDetails.tsx`, and `ResultsCharts.tsx`, assuming libraries are loaded by the global `Wrapper`.
+*   The results components (`ResultsSummary`, `ResultsCharts`, `ResultsDetails`) all show a `LoadingIndicator` based on the `isCalculating` state from the Zustand store.
 *   All components needing shared data interact with the Zustand store (`src/store/index.ts`).
 *   Components triggering map operations or data fetching call functions within `src/services/mapService.ts`.
 *   `App.tsx` is the root component rendered by `main.tsx`.
