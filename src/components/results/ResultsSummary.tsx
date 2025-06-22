@@ -46,28 +46,31 @@ const ResultsSummary: React.FC = () => {
     );
     
     if (resultsToDestination.length > 0) {
-      // Calculate average duration
-      const totalDuration = resultsToDestination.reduce(
-        (sum, r) => sum + r.durationValue, 0
-      );
-      const avgDuration = totalDuration / resultsToDestination.length;
-      
-      // Find best and worst times
-      const sortedResults = [...resultsToDestination].sort(
-        (a, b) => a.durationValue - b.durationValue
-      );
-      
-      const bestResult = sortedResults[0];
-      const worstResult = sortedResults[sortedResults.length - 1];
-      
-      destinationGroups[destination.id] = {
-        destination,
-        avgDuration,
-        bestTime: bestResult.timeOption,
-        worstTime: worstResult.timeOption,
-        bestDuration: bestResult.durationValue,
-        worstDuration: worstResult.durationValue
-      };
+      // Filter by traffic model
+      const bestGuessResults = resultsToDestination.filter(r => r.trafficModel === 'best_guess');
+      const optimisticResults = resultsToDestination.filter(r => r.trafficModel === 'optimistic');
+      const pessimisticResults = resultsToDestination.filter(r => r.trafficModel === 'pessimistic');
+
+      if (bestGuessResults.length > 0 && optimisticResults.length > 0 && pessimisticResults.length > 0) {
+        // Calculate average duration from 'best_guess'
+        const totalDuration = bestGuessResults.reduce(
+          (sum, r) => sum + r.durationValue, 0
+        );
+        const avgDuration = totalDuration / bestGuessResults.length;
+
+        // Find best and worst times from 'optimistic' and 'pessimistic'
+        const bestResult = optimisticResults.sort((a, b) => a.durationValue - b.durationValue)[0];
+        const worstResult = pessimisticResults.sort((a, b) => a.durationValue - b.durationValue)[pessimisticResults.length - 1];
+
+        destinationGroups[destination.id] = {
+          destination,
+          avgDuration,
+          bestTime: bestResult.timeOption,
+          worstTime: worstResult.timeOption,
+          bestDuration: bestResult.durationValue,
+          worstDuration: worstResult.durationValue
+        };
+      }
     }
   });
   

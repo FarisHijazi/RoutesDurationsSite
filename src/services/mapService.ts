@@ -9,11 +9,6 @@ export const calculateRoutes = async (
   destinations: Location[],
   selectedTimes: string[]
 ): Promise<RouteResult[]> => {
-  // If in mock mode, return mock data
-  if (MOCK_MODE) {
-    return generateMockResults(property, destinations, selectedTimes);
-  }
-
   try {
     const promises: Promise<RouteResult>[] = [];
 
@@ -28,16 +23,6 @@ export const calculateRoutes = async (
             calculateRoute(
               property,
               destination,
-              timeOption,
-              trafficModel
-            )
-          );
-
-          // Calculate route from destination to property
-          promises.push(
-            calculateRoute(
-              destination,
-              property,
               timeOption,
               trafficModel
             )
@@ -98,120 +83,11 @@ const calculateRoute = async (
     toId: destination.id,
     time: element.duration.text,
     distance: element.distance.text,
-    durationValue: element.duration.value,
+    durationValue: element.duration_in_traffic
+      ? element.duration_in_traffic.value
+      : element.duration.value,
     distanceValue: element.distance.value,
     timeOption,
     trafficModel
   };
-};
-
-// Generate mock results for development
-const generateMockResults = (
-  property: Location,
-  destinations: Location[],
-  selectedTimes: string[]
-): RouteResult[] => {
-  const results: RouteResult[] = [];
-  
-  // Traffic multipliers by time
-  const trafficMultipliers: { [key: string]: number } = {
-    '06:00': 1.0,  // Light traffic
-    '08:00': 1.8,  // Heavy rush hour
-    '10:00': 1.2,  // Medium traffic
-    '12:00': 1.3,  // Lunch hour
-    '14:00': 1.1,  // Afternoon
-    '16:00': 1.7,  // Evening rush hour
-    '18:00': 1.5,  // Still heavy but tapering
-    '20:00': 1.1,  // Evening
-  };
-
-  const trafficModelMultipliers = {
-    best_guess: 1.0,
-    optimistic: 0.8,
-    pessimistic: 1.2,
-  };
-
-  // For each time
-  for (const timeOption of selectedTimes) {
-    // For each destination
-    for (const destination of destinations) {
-      // Calculate base values based on actual distance
-      const lat1 = property.position.lat;
-      const lng1 = property.position.lng;
-      const lat2 = destination.position.lat;
-      const lng2 = destination.position.lng;
-      // Simple distance calculation (in km)
-      const distance = calculateDistance(lat1, lng1, lat2, lng2);
-      const distanceText = `${distance.toFixed(1)} km`;
-      // Base duration in seconds (assuming average speed of 50 km/h)
-      const baseDuration = (distance / 50) * 3600;
-      // Apply traffic multiplier
-      const multiplier = trafficMultipliers[timeOption] || 1.0;
-      // For each traffic model
-      (['best_guess', 'optimistic', 'pessimistic'] as const).forEach(trafficModel => {
-        const modelMultiplier = trafficModelMultipliers[trafficModel];
-        const duration = baseDuration * multiplier * modelMultiplier;
-        // Format duration text
-        let durationText = '';
-        if (duration < 3600) {
-          durationText = `${Math.round(duration / 60)} mins`;
-        } else {
-          const hours = Math.floor(duration / 3600);
-          const minutes = Math.round((duration % 3600) / 60);
-          durationText = `${hours} hour${hours > 1 ? 's' : ''} ${minutes} mins`;
-        }
-        // Add to property to destination
-        results.push({
-          fromId: property.id,
-          toId: destination.id,
-          time: durationText,
-          distance: distanceText,
-          durationValue: duration,
-          distanceValue: distance * 1000, // Convert to meters
-          timeOption,
-          trafficModel
-        });
-        // Add destination to property (slightly different values for realism)
-        const returnMultiplier = multiplier * (0.9 + Math.random() * 0.2);
-        const returnDuration = baseDuration * returnMultiplier * modelMultiplier;
-        let returnDurationText = '';
-        if (returnDuration < 3600) {
-          returnDurationText = `${Math.round(returnDuration / 60)} mins`;
-        } else {
-          const hours = Math.floor(returnDuration / 3600);
-          const minutes = Math.round((returnDuration % 3600) / 60);
-          returnDurationText = `${hours} hour${hours > 1 ? 's' : ''} ${minutes} mins`;
-        }
-        results.push({
-          fromId: destination.id,
-          toId: property.id,
-          time: returnDurationText,
-          distance: distanceText,
-          durationValue: returnDuration,
-          distanceValue: distance * 1000, // Convert to meters
-          timeOption,
-          trafficModel
-        });
-      });
-    }
-  }
-  return results;
-};
-
-// Calculate distance between two points using Haversine formula
-const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
-  const R = 6371; // Radius of the earth in km
-  const dLat = deg2rad(lat2 - lat1);
-  const dLon = deg2rad(lon2 - lon1);
-  const a = 
-    Math.sin(dLat/2) * Math.sin(dLat/2) +
-    Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
-    Math.sin(dLon/2) * Math.sin(dLon/2); 
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
-  const distance = R * c; // Distance in km
-  return distance;
-};
-
-const deg2rad = (deg: number): number => {
-  return deg * (Math.PI/180);
 };
