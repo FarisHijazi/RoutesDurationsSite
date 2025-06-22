@@ -29,6 +29,8 @@ alwaysApply: true
 
 ## Major features:
 
+- color consistency:
+    - [ ] there needs to be consistency between all the pages of the pins on the map, the pin icons in the destinations list, and locations and in the results plot. Each one should have a unique color that is consistent across the pages and the maps embed.
 - **location selection page**
     - [x] when I double click on the map, I want the pin to be added at the location of the double click.
     - [x] start with the first pin already dropped in the current user's location, dropped but not confirmed/added as the location
@@ -41,6 +43,9 @@ alwaysApply: true
     - facilities are defined as: 🏋️ gyms, 🧺 laundry mats, 🏪 minimarkets )بقالة(, and ⛽ fuel stations.
     - [ ] In the location selection page, add a section at the bottom of the page that allows the user to add facilities. The above facilities should always be added as the default values, and the user can add or remove those textfields, once the user is done, they can press next. These can be checked and unchecked on the maps destinations selection page, the user can then add a button "Add facilities". As the user adds locations, they get added to the map
 - **Results page**
+    - [ ] the time calculation is off, I don't ever remember asking for "mode multipliers" or any multiplier. 
+    - [ ] we have to verify that the best, worst, and average times are correct, we need to revise the accuracy of the results.
+    - [x] parallel API calls: the results page takes a very long time to show results, please parallelize ALL the API calls aggressively to minimize the time it takes, currently it takes about 1minute, it should be around 3 seconds.
     - [x] MAJOR BUG: the MOCK_MODE is not identical to the actual API, the entire website is built on the MOCK, so please change the actual non-MOCK functions so that they look like the MOCK functions
     - [x] MAJOR BUG: the results page travel summary does not show the actual Best and worst and average time, rather, it uses 6 AM and 8 AM. Please actually use all the times to get proper statistics.
     - [x] Fix the results page time plots in the "Trip Details" section, the time dropdown doesn't actually change the plots
@@ -48,13 +53,16 @@ alwaysApply: true
     - [x] When building the confidence band plot, use a common X-axis for all the locations and repeat the Y-axis multiple times for each location, but make sure they are all the same scale.
     - [x] add the ability to print the results page as a report
     - [x] in the results page plot, have Google maps color codes: red for durations above 30 minutes, yellow for durations between 10 minutes and 30 minutes, and blue for durations below 10 minutes.
+    - [x] add a timer that tells the user how long the search took
 
 ## Potential Minor Enhancements & Polish:
+- [ ] in the "Time periods" page, make them vertical, not a grid view.
 - [x] in the results, page the checkboxes that enable and disable the confidence band plots are actually changing the colors of the plots, it seems that the plots colors are based on the index of the plot, the first plot is always blue, and the second is green, and the third is yellow. I think the best solution is to explicitly generate random colors and that way they'll be explicitly assigned to each plot.
 - [x] in the results, the "Select Destination:" dropdown should not exist, and instead, there should be a bar plot with the times for each location, basically what I'm asking for is for you to unroll it so that the user doesn't have to interact with each one
 - **Mobile Map Usability**:
     - [ ] Further review map interactions on various mobile devices.
     - [ ] Consider if explicit "double-click" functionality is truly needed (currently deemed low priority).
+    - [ ] when "Add This Location" is clicked, the map moves and then the pin drops, it should drop first then the map moves
 - **Configuration**:
     - [ ] Make `MOCK_MODE` in `mapService.ts` configurable or ensure it's disabled for production builds.
     - [ ] Review other potentially hardcoded values (e.g., map zoom, `maxDuration` in `ResultsMap.tsx`) for configurability if beneficial.

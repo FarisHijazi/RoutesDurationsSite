@@ -15,7 +15,8 @@ const ResultsStep: React.FC = () => {
     routeResults, 
     setRouteResults, 
     isCalculating, 
-    setIsCalculating, 
+    setIsCalculating,
+    setCalculationTime,
     setError 
   } = useStore();
   
@@ -28,6 +29,8 @@ const ResultsStep: React.FC = () => {
   ) => {
     setIsCalculating(true);
     setError(null);
+    setCalculationTime(null);
+    const startTime = performance.now();
     try {
       const results = await calculateRoutes(property, destinations, selectedTimes);
       setRouteResults(results);
@@ -47,9 +50,11 @@ const ResultsStep: React.FC = () => {
       }
       setError(errorMessage);
     } finally {
+      const endTime = performance.now();
+      setCalculationTime(endTime - startTime);
       setIsCalculating(false);
     }
-  }, [setIsCalculating, setError, setRouteResults]);
+  }, [setIsCalculating, setError, setRouteResults, setCalculationTime]);
 
   useEffect(() => {
     const property = locations.find(loc => loc.isProperty);

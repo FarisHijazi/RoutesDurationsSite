@@ -9,14 +9,14 @@ export const calculateRoutes = async (
   destinations: Location[],
   selectedTimes: string[]
 ): Promise<RouteResult[]> => {
-  const results: RouteResult[] = [];
-  
   // If in mock mode, return mock data
   if (MOCK_MODE) {
     return generateMockResults(property, destinations, selectedTimes);
   }
 
   try {
+    const promises: Promise<RouteResult>[] = [];
+
     // For each time
     for (const timeOption of selectedTimes) {
       // For each destination
@@ -24,26 +24,31 @@ export const calculateRoutes = async (
         // For each traffic model
         for (const trafficModel of ['best_guess', 'optimistic', 'pessimistic'] as const) {
           // Calculate route from property to destination
-          const toDestResult = await calculateRoute(
-            property,
-            destination,
-            timeOption,
-            trafficModel
+          promises.push(
+            calculateRoute(
+              property,
+              destination,
+              timeOption,
+              trafficModel
+            )
           );
-          results.push(toDestResult);
 
           // Calculate route from destination to property
-          const fromDestResult = await calculateRoute(
-            destination,
-            property,
-            timeOption,
-            trafficModel
+          promises.push(
+            calculateRoute(
+              destination,
+              property,
+              timeOption,
+              trafficModel
+            )
           );
-          results.push(fromDestResult);
         }
       }
     }
+
+    const results = await Promise.all(promises);
     return results;
+
   } catch (error) {
     console.error('Error calculating routes:', error);
     throw error;

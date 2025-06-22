@@ -35,8 +35,8 @@ interface StoreState {
   routeResults: RouteResult[];
   isCalculating: boolean;
   error: string | null;
-  selectedTimeOption: string;
-  setSelectedTimeOption: (value: string) => void;
+  calculationTime: number | null;
+  setApiKey: (key: string) => void;
   setStep: (step: number) => void;
   addLocation: (location: Location) => void;
   removeLocation: (id: string) => void;
@@ -45,8 +45,10 @@ interface StoreState {
   setRouteResults: (results: RouteResult[]) => void;
   setIsCalculating: (isCalculating: boolean) => void;
   setError: (error: string | null) => void;
+  setCalculationTime: (time: number | null) => void;
   reset: () => void;
 }
+
 const DEFAULT_TIME_OPTIONS: TimeOption[] = [
   { value: '06:00', label: '6:00 AM', selected: true },
   { value: '07:00', label: '7:00 AM', selected: true },
@@ -75,43 +77,37 @@ export const useStore = create<StoreState>((set) => ({
   routeResults: [],
   isCalculating: false,
   error: null,
-  selectedTimeOption: DEFAULT_TIME_OPTIONS.find(t => t.selected)?.value || DEFAULT_TIME_OPTIONS[0].value,
-  setSelectedTimeOption: (value) => set({ selectedTimeOption: value }),
-  
+  calculationTime: null,
+  setApiKey: (key) => set({ apiKey: key }),
   setStep: (step) => set({ step }),
-  
-  addLocation: (location) => set((state) => ({
-    locations: [...state.locations, location]
-  })),
-  
+  addLocation: (location) => set((state) => {
+    const newLocation = { ...location, isProperty: state.locations.length === 0 };
+    return { locations: [...state.locations, newLocation] };
+  }),
   removeLocation: (id) => set((state) => ({
     locations: state.locations.filter(location => location.id !== id)
   })),
-  
   updateLocation: (id, updates) => set((state) => ({
     locations: state.locations.map(location => 
       location.id === id ? { ...location, ...updates } : location
     )
   })),
-  
   toggleTimeOption: (value) => set((state) => ({
     timeOptions: state.timeOptions.map(option => 
       option.value === value ? { ...option, selected: !option.selected } : option
     )
   })),
-  
   setRouteResults: (results) => set({ routeResults: results }),
-  
   setIsCalculating: (isCalculating) => set({ isCalculating }),
-  
   setError: (error) => set({ error }),
-  
+  setCalculationTime: (time) => set({ calculationTime: time }),
   reset: () => set({
     step: 0,
     locations: [],
     timeOptions: DEFAULT_TIME_OPTIONS,
     routeResults: [],
     isCalculating: false,
-    error: null
-  })
+    error: null,
+    calculationTime: null,
+  }),
 }));

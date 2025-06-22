@@ -4,7 +4,7 @@ import { Clock3Icon, MapPinIcon, AlertCircleIcon } from 'lucide-react';
 import LoadingIndicator from '../common/LoadingIndicator';
 
 const ResultsSummary: React.FC = () => {
-  const { locations, routeResults, isCalculating } = useStore();
+  const { locations, routeResults, isCalculating, calculationTime, timeOptions } = useStore();
   
   if (isCalculating) {
     return <LoadingIndicator text="Calculating travel summary..." />;
@@ -89,9 +89,19 @@ const ResultsSummary: React.FC = () => {
   // Sort destination groups by average duration (best to worst)
   const sortedDestinationGroups = Object.values(destinationGroups).sort((a, b) => a.avgDuration - b.avgDuration);
 
+  const destinationCount = locations.filter(loc => !loc.isProperty).length;
+  const timeCount = timeOptions.filter(t => t.selected).length;
+
   return (
     <div>
-      <h3 className="text-lg font-medium text-gray-800 mb-4">Travel Summary</h3>
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-lg font-medium text-gray-800">Travel Summary</h3>
+        {calculationTime && (
+          <p className="text-sm text-gray-500">
+            Searched {destinationCount} locations and {timeCount} time periods in {(calculationTime / 1000).toFixed(1)} seconds.
+          </p>
+        )}
+      </div>
       
       {sortedDestinationGroups.length === 0 ? (
         <div className="text-center py-4 text-gray-500">
