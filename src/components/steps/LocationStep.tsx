@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { MapPinIcon, HomeIcon, BuildingIcon, XIcon, SearchIcon } from 'lucide-react';
-import { useStore, Location } from '../../store';
+import { useStore, Location, DESTINATION_COLORS, PROPERTY_COLOR } from '../../store';
 import MapComponent from '../map/MapComponent';
 
 const LocationStep: React.FC = () => {
@@ -17,6 +17,10 @@ const LocationStep: React.FC = () => {
 
   const hasProperty = locations.some(loc => loc.isProperty);
   
+  const nextLocationColor = hasProperty 
+    ? DESTINATION_COLORS[(locations.length - 1) % DESTINATION_COLORS.length]
+    : PROPERTY_COLOR;
+
   useEffect(() => {
     if (!hasProperty) {
       setIsProperty(true);
@@ -91,7 +95,7 @@ const LocationStep: React.FC = () => {
   const handleAddLocation = () => {
     if (!selectedPosition || !locationName.trim()) return;
     
-    const newLocation: Location = {
+    const newLocation = {
       id: Date.now().toString(),
       name: locationName || (isProperty ? 'My Property' : `Destination ${locations.filter(l => !l.isProperty).length + 1}`),
       position: selectedPosition,
@@ -202,6 +206,7 @@ const LocationStep: React.FC = () => {
                   locations={locations}
                   onPositionSelect={handleMapPositionSelect}
                   selectedPosition={selectedPosition}
+                  nextLocationColor={nextLocationColor}
                 />
             ) : (
               <div className="w-full h-full flex items-center justify-center bg-gray-200">
@@ -299,22 +304,24 @@ interface LocationItemProps {
 }
 
 const LocationItem: React.FC<LocationItemProps> = ({ location, onRemove }) => {
+  const Icon = location.isProperty ? HomeIcon : BuildingIcon;
+  
   return (
-    <li className="flex items-center justify-between bg-white rounded-md p-3 shadow-sm border border-gray-200">
+    <li className="flex items-center justify-between bg-white p-3 rounded-md border border-gray-200 shadow-sm">
       <div className="flex items-center">
-        {location.isProperty ? (
-          <HomeIcon className="h-5 w-5 text-blue-500 mr-2" />
-        ) : (
-          <BuildingIcon className="h-5 w-5 text-red-500 mr-2" />
-        )}
-        <span className="font-medium text-gray-700">{location.name}</span>
+        <div 
+          className="w-4 h-4 rounded-full mr-3"
+          style={{ backgroundColor: location.color }}
+        ></div>
+        <Icon className="h-5 w-5 text-gray-500 mr-3" />
+        <span className="text-gray-800">{location.name}</span>
       </div>
-      <button
+      <button 
         onClick={() => onRemove(location.id)}
         className="text-gray-400 hover:text-red-500 transition-colors"
-        aria-label="Remove location"
+        aria-label={`Remove ${location.name}`}
       >
-        <XIcon className="h-4 w-4" />
+        <XIcon className="h-5 w-5" />
       </button>
     </li>
   );

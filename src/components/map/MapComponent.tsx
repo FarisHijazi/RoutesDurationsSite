@@ -7,13 +7,15 @@ interface MapComponentProps {
   onPositionSelect: (position: google.maps.LatLngLiteral) => void;
   selectedPosition: google.maps.LatLngLiteral | null;
   onLibrariesLoaded?: () => void;
+  nextLocationColor: string;
 }
 
 const MapComponent: React.FC<MapComponentProps> = ({ 
   locations, 
   onPositionSelect,
   selectedPosition, 
-  onLibrariesLoaded
+  onLibrariesLoaded,
+  nextLocationColor
 }) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<google.maps.Map | null>(null);
@@ -123,9 +125,12 @@ const MapComponent: React.FC<MapComponentProps> = ({
           map,
           title: location.name,
           icon: {
-            url: location.isProperty 
-              ? 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png'
-              : 'http://maps.google.com/mapfiles/ms/icons/red-dot.png',
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: location.isProperty ? 10 : 8,
+            fillColor: location.color,
+            fillOpacity: 1,
+            strokeWeight: location.isProperty ? 2 : 1,
+            strokeColor: 'white',
           },
           animation: google.maps.Animation.DROP,
         });
@@ -170,7 +175,12 @@ const MapComponent: React.FC<MapComponentProps> = ({
         position: selectedPosition,
         map,
         icon: {
-          url: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png',
+          path: google.maps.SymbolPath.CIRCLE,
+          scale: 10,
+          fillColor: nextLocationColor,
+          fillOpacity: 1,
+          strokeWeight: 2,
+          strokeColor: 'white',
         },
         animation: google.maps.Animation.BOUNCE,
       });
@@ -188,7 +198,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
         markerToSet.setMap(null);
       }
     };
-  }, [map, selectedPosition?.lat, selectedPosition?.lng, isMobileView]); // Use lat/lng for dependency to avoid loop
+  }, [map, selectedPosition?.lat, selectedPosition?.lng, isMobileView, nextLocationColor]); // Use lat/lng for dependency to avoid loop
 
   return (
     <div className="relative w-full h-full">

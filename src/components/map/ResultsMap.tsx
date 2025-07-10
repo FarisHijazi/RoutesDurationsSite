@@ -48,9 +48,12 @@ const ResultsMap: React.FC<ResultsMapProps> = ({
           map,
           title: location.name,
           icon: {
-            url: location.isProperty 
-              ? 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png'
-              : 'http://maps.google.com/mapfiles/ms/icons/red-dot.png',
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: location.isProperty ? 10 : 8,
+            fillColor: location.color,
+            fillOpacity: 1,
+            strokeWeight: location.isProperty ? 2 : 1,
+            strokeColor: 'white',
           },
         });
         

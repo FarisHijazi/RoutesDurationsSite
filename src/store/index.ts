@@ -8,6 +8,7 @@ export interface Location {
     lng: number;
   };
   isProperty: boolean;
+  color: string;
 }
 
 export interface TimeOption {
@@ -38,7 +39,7 @@ interface StoreState {
   calculationTime: number | null;
   setApiKey: (key: string) => void;
   setStep: (step: number) => void;
-  addLocation: (location: Location) => void;
+  addLocation: (location: Omit<Location, 'color'>) => void;
   removeLocation: (id: string) => void;
   updateLocation: (id: string, updates: Partial<Location>) => void;
   toggleTimeOption: (value: string) => void;
@@ -48,6 +49,21 @@ interface StoreState {
   setCalculationTime: (time: number | null) => void;
   reset: () => void;
 }
+
+export const DESTINATION_COLORS = [
+  '#FF5733', // Red-Orange
+  '#33FF57', // Green
+  '#3357FF', // Blue
+  '#FF33A1', // Pink
+  '#A133FF', // Purple
+  '#33FFF0', // Cyan
+  '#FFC300', // Yellow
+  '#FF8C00', // Dark Orange
+  '#00CED1', // Dark Turquoise
+  '#ADFF2F', // Green-Yellow
+];
+
+export const PROPERTY_COLOR = '#4A90E2'; // A nice blue for the property
 
 const DEFAULT_TIME_OPTIONS: TimeOption[] = [
   { value: '06:00', label: '6:00 AM', selected: true },
@@ -81,7 +97,16 @@ export const useStore = create<StoreState>((set) => ({
   setApiKey: (key) => set({ apiKey: key }),
   setStep: (step) => set({ step }),
   addLocation: (location) => set((state) => {
-    const newLocation = { ...location, isProperty: state.locations.length === 0 };
+    const isProperty = state.locations.length === 0;
+    const color = isProperty 
+      ? PROPERTY_COLOR 
+      : DESTINATION_COLORS[(state.locations.length - 1) % DESTINATION_COLORS.length];
+    
+    const newLocation: Location = { 
+      ...location, 
+      isProperty: location.isProperty,
+      color,
+    };
     return { locations: [...state.locations, newLocation] };
   }),
   removeLocation: (id) => set((state) => ({

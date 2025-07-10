@@ -15,7 +15,7 @@ import {
   ChartOptions
 } from 'chart.js';
 import LoadingIndicator from '../common/LoadingIndicator';
-import { RouteResult, TimeOption } from '../../store';
+import { RouteResult, TimeOption, Location } from '../../store';
 
 ChartJS.register(
   CategoryScale,
@@ -28,19 +28,17 @@ ChartJS.register(
   Filler
 );
 
-const getDurationColor = (duration: number): string => {
-  if (duration > 30) {
-    return 'rgba(239, 68, 68, 1)'; // red
-  }
-  if (duration >= 10) {
-    return 'rgba(234, 179, 8, 1)'; // yellow
-  }
-  return 'rgba(59, 130, 246, 1)'; // blue
-};
+function hexToRgba(hex: string, alpha: number): string {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
 
 interface ConfidenceBandData {
   destinationId: string;
   destinationName: string;
+  color: string;
   min: number[]; // optimistic
   max: number[]; // pessimistic
   avg: number[]; // best_guess
@@ -74,17 +72,6 @@ const ResultsCharts: React.FC = () => {
   const [visible, setVisible] = useState<{ [id: string]: boolean }>({});
   const [hovered, setHovered] = useState<string | null>(null);
 
-  // Assign a unique, persistent color to each destination based on its ID
-  function getColorMap(bands: ConfidenceBandData[]): Record<string, string> {
-    const colorMap: Record<string, string> = {};
-    bands.forEach(band => {
-      const sum = band.avg.reduce((a, b) => a + b, 0);
-      const overallAvg = sum / (band.avg.length || 1);
-      colorMap[band.destinationId] = getDurationColor(overallAvg);
-    });
-    return colorMap;
-  }
-
   // Prepare data for confidence band plot
   const confidenceBandData: ConfidenceBandData[] = useMemo(() => {
     const property = locations.find(loc => loc.isProperty);
@@ -100,6 +87,7 @@ const ResultsCharts: React.FC = () => {
         bands.push({
           destinationId: dest.id,
           destinationName: dest.name,
+          color: dest.color,
           ...outbound,
         });
       }
@@ -110,15 +98,17 @@ const ResultsCharts: React.FC = () => {
         bands.push({
           destinationId: `${dest.id}-return`,
           destinationName: `${dest.name} (Return)`,
+          color: dest.color,
           ...inbound,
         });
       }
     });
-    return bands;
+    return bands.sort((a, b) => {
+      const aAvg = a.avg.reduce((sum, v) => sum + v, 0) / a.avg.length;
+      const bAvg = b.avg.reduce((sum, v) => sum + v, 0) / b.avg.length;
+      return aAvg - bAvg;
+    });
   }, [locations, routeResults, timeOptions]);
-
-  // Assign persistent colors to each destination
-  const colorMap = useMemo(() => getColorMap(confidenceBandData), [confidenceBandData]);
 
   // X-axis labels
   const timeLabels = timeOptions.map(t => t.label);
@@ -154,9 +144,9 @@ const ResultsCharts: React.FC = () => {
   // Build datasets and keep track of Best Case indices
   const datasets: any[] = [];
   visibleBands.forEach((band) => {
-    const color = colorMap[band.destinationId] || getDurationColor(0);
-    const baseAlpha = hovered && hovered !== band.destinationId ? '0.10' : '0.25';
-    const strongAlpha = hovered === band.destinationId ? '0.5' : baseAlpha;
+    const color = band.color || '#333';
+    const baseAlpha = hovered && hovered !== band.destinationId ? 0.1 : 0.2;
+    const strongAlpha = hovered === band.destinationId ? 0.4 : baseAlpha;
     // Index of Best Case dataset (will be datasets.length before push)
     const bestCaseIndex = datasets.length;
     // Best Case (min)
@@ -164,7 +154,7 @@ const ResultsCharts: React.FC = () => {
       label: `${band.destinationName} (Best Case)`,
       data: band.min,
       fill: false,
-      backgroundColor: color.replace('1)', `${baseAlpha})`),
+      backgroundColor: hexToRgba(color, baseAlpha),
       borderColor: 'rgba(0,0,0,0)',
       pointRadius: 0,
       type: 'line' as const,
@@ -177,8 +167,8 @@ const ResultsCharts: React.FC = () => {
     datasets.push({
       label: `${band.destinationName} (Worst Case)`,
       data: band.max,
-      fill: { target: bestCaseIndex, above: color.replace('1)', `${strongAlpha})`), below: color.replace('1)', `${strongAlpha})`) },
-      backgroundColor: color.replace('1)', `${strongAlpha})`),
+      fill: { target: bestCaseIndex, above: hexToRgba(color, strongAlpha), below: hexToRgba(color, strongAlpha) },
+      backgroundColor: hexToRgba(color, strongAlpha),
       borderColor: 'rgba(0,0,0,0)',
       pointRadius: 0,
       type: 'line' as const,
@@ -192,8 +182,8 @@ const ResultsCharts: React.FC = () => {
       label: `${band.destinationName} (Average)`,
       data: band.avg,
       fill: false,
-      borderColor: hovered === band.destinationId ? color : color.replace('1)', `${baseAlpha})`),
-      backgroundColor: hovered === band.destinationId ? color : color.replace('1)', `${baseAlpha})`),
+      borderColor: hovered === band.destinationId ? color : hexToRgba(color, 0.5),
+      backgroundColor: hovered === band.destinationId ? color : hexToRgba(color, 0.5),
       pointRadius: 3,
       type: 'line' as const,
       order: hovered === band.destinationId ? 100 : 3,
@@ -294,7 +284,7 @@ const ResultsCharts: React.FC = () => {
 
   return (
     <div>
-      <h3 className="text-lg font-medium text-gray-800 mb-4">Travel Time Analysis</h3>
+      <h3 className="text-lg font-medium text-gray-800 mb-4">Your day at a glance</h3>
       <div className="flex flex-wrap gap-4 mb-4">
         {confidenceBandData.map((band) => (
           <label key={band.destinationId} className="flex items-center gap-2 cursor-pointer">
@@ -303,7 +293,7 @@ const ResultsCharts: React.FC = () => {
               checked={visible[band.destinationId] ?? true}
               onChange={e => setVisible(v => ({ ...v, [band.destinationId]: e.target.checked }))}
             />
-            <span style={{ color: colorMap[band.destinationId] || getDurationColor(0) }}>{band.destinationName}</span>
+            <span style={{ color: band.color || '#333' }}>{band.destinationName}</span>
           </label>
         ))}
       </div>

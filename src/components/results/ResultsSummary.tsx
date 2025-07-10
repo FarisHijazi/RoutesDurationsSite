@@ -53,6 +53,7 @@ const ResultsSummary: React.FC = () => {
   // Group results by destination and direction
   const destinationGroups: { [key: string]: {
     name: string,
+    color: string,
     avgDuration: number,
     bestTime: string,
     worstTime: string,
@@ -67,7 +68,7 @@ const ResultsSummary: React.FC = () => {
     );
     if (resultsTo.length > 0) {
       const { avgDuration, bestTime, worstTime, bestDuration, worstDuration } = processResults(resultsTo);
-      destinationGroups[destination.id] = { name: destination.name, avgDuration, bestTime, worstTime, bestDuration, worstDuration };
+      destinationGroups[destination.id] = { name: destination.name, color: destination.color, avgDuration, bestTime, worstTime, bestDuration, worstDuration };
     }
     
     // Process return trips (destination -> property)
@@ -76,7 +77,7 @@ const ResultsSummary: React.FC = () => {
     );
     if (resultsFrom.length > 0) {
       const { avgDuration, bestTime, worstTime, bestDuration, worstDuration } = processResults(resultsFrom);
-      destinationGroups[`${destination.id}-return`] = { name: `${destination.name} (Return)`, avgDuration, bestTime, worstTime, bestDuration, worstDuration };
+      destinationGroups[`${destination.id}-return`] = { name: `${destination.name} (Return)`, color: destination.color, avgDuration, bestTime, worstTime, bestDuration, worstDuration };
     }
   });
 
@@ -118,10 +119,10 @@ const ResultsSummary: React.FC = () => {
         </div>
       ) : (
         <div className="space-y-4">
-          {sortedDestinationGroups.map(({ name, avgDuration, bestTime, worstTime, bestDuration, worstDuration }, index) => (
+          {sortedDestinationGroups.map(({ name, color, avgDuration, bestTime, worstTime, bestDuration, worstDuration }, index) => (
             <div key={index} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
               <div className="flex items-start">
-                <MapPinIcon className="h-5 w-5 text-red-500 mr-2 mt-0.5" />
+                <MapPinIcon className="h-5 w-5 mr-2 mt-0.5" style={{ color }} />
                 <div>
                   <h4 className="font-medium text-gray-800">{name}</h4>
                   

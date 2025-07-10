@@ -24,13 +24,15 @@ alwaysApply: true
     - `ResultsStep.tsx` uses a continuous, back-to-back display for results components.
     - Results tables are now horizontally scrollable and fully visible.
     - Map does not zoom in when adding the first location.
-- **Confidence Band Plot**: The results page displays a confidence band plot for each destination. The plots now use dynamic, Google Maps-style color-coding (red/yellow/blue) based on the overall average travel time for that destination.
+- **Confidence Band Plot**: The results page displays a confidence band plot for each destination. The plots now use colors that are persistent and consistent for each location across the application. The transparency of the bands has been adjusted for better visibility of overlapping plots.
 
 
 ## Major features:
 
+- [ ] in the reports page, add a Logo and URL for social sharing so that people will know that this report was generated using zahma.fhijazi.com
+- [ ] in the reports page, generate statistics and scenarios. Things like "based on this traffic, you will be spending X amount of time in traffic daily/yearly"
 - color consistency:
-    - [ ] there needs to be consistency between all the pages of the pins on the map, the pin icons in the destinations list, and locations and in the results plot. Each one should have a unique color that is consistent across the pages and the maps embed.
+    - [x] there needs to be consistency between all the pages of the pins on the map, the pin icons in the destinations list, and locations and in the results plot. Each one should have a unique color that is consistent across the pages and the maps embed.
 - **location selection page**
     - [x] when I double click on the map, I want the pin to be added at the location of the double click.
     - [x] start with the first pin already dropped in the current user's location, dropped but not confirmed/added as the location
