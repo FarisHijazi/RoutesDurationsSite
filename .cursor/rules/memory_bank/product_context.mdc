@@ -21,6 +21,6 @@ The application should guide users through a step-by-step wizard:
 
 ## User Experience Goals
 *   **Intuitive Interface**: A clean, user-friendly wizard that is easy to navigate.
-*   **Clear Visualization**: Maps, graphs, and lists should present complex data in an easily digestible manner.
+*   **Clear Visualization**: Maps, graphs, and lists should present complex data in an easily digestible manner. **To support this, each destination is assigned a unique, persistent color that is used consistently on map pins, lists, and charts, allowing users to easily track locations across different views.**
 *   **Actionable Insights**: Users should be able to quickly understand the travel implications for their chosen locations and times.
 *   **Responsive Design**: The application should be usable across different devices, with a focus on desktop for detailed analysis.
